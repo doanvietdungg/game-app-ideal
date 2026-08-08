@@ -1,0 +1,50 @@
+name: kidtime
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: kidtime-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    networks:
+      - kidtime-net
+
+  web:
+    image: nginx:alpine
+    container_name: kidtime-web
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/conf.d/app.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - kidtime-net
+
+  db:
+    image: mysql:8.0
+    container_name: kidtime-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: kidtime
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - kidtime-net
+
+networks:
+  kidtime-net:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
