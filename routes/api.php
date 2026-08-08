@@ -1,14 +1,20 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use KidTime\Presentation\Api\V1\AnalyticsController;
 use KidTime\Presentation\Api\V1\AuthController;
 use KidTime\Presentation\Api\V1\ChildController;
+use KidTime\Presentation\Api\V1\PinController;
+use KidTime\Presentation\Api\V1\RewardController;
+use KidTime\Presentation\Api\V1\TaskController;
+use KidTime\Presentation\Api\V1\TaskLogController;
 
 Route::prefix('v1')->group(function () {
     // Auth public routes
     Route::post('auth/register', [AuthController::class, 'register']);
     Route::post('auth/login', [AuthController::class, 'login']);
     Route::post('auth/child-login', [AuthController::class, 'childLogin']);
+    Route::post('pin/verify', [PinController::class, 'verify']);
 
     // Protected routes (Sanctum)
     Route::middleware('auth:sanctum')->group(function () {
@@ -18,5 +24,25 @@ Route::prefix('v1')->group(function () {
         // Children routes
         Route::get('children', [ChildController::class, 'index']);
         Route::post('children', [ChildController::class, 'store']);
+
+        // Tasks routes
+        Route::get('tasks/templates', [TaskController::class, 'templates']);
+        Route::get('tasks', [TaskController::class, 'index']);
+        Route::post('tasks', [TaskController::class, 'store']);
+        Route::delete('tasks/{id}', [TaskController::class, 'destroy']);
+
+        // Task Logs routes
+        Route::post('task-logs', [TaskLogController::class, 'submit']);
+        Route::get('task-logs/pending', [TaskLogController::class, 'pending']);
+        Route::post('task-logs/{id}/approve', [TaskLogController::class, 'approve']);
+        Route::post('task-logs/{id}/reject', [TaskLogController::class, 'reject']);
+
+        // Rewards routes
+        Route::get('rewards', [RewardController::class, 'index']);
+        Route::post('rewards', [RewardController::class, 'store']);
+        Route::post('rewards/{id}/redeem', [RewardController::class, 'redeem']);
+
+        // Analytics routes
+        Route::get('analytics/weekly/{childId}', [AnalyticsController::class, 'weekly']);
     });
 });
