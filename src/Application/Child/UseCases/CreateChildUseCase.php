@@ -22,12 +22,9 @@ class CreateChildUseCase
         }
 
         $species = PetSpecies::from($petSpecies);
-        $child = new Child(null, $familyId, $name, $age);
-        $savedChild = $this->childRepository->save($child);
+        $pet = new Pet(null, 0, $species);
+        $child = new Child(null, $familyId, $name, $age, null, 0, 0, 0, null, $pet);
 
-        $pet = new Pet(null, $savedChild->getId(), $species);
-        // Relationship saved with pet
-
-        return $savedChild;
+        return $this->childRepository->save($child);
     }
 }
