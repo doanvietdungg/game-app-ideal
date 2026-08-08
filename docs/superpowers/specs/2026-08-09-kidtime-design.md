@@ -1,6 +1,6 @@
 # KidTime — Design Spec (Full Version)
 **Ngày:** 2026-08-09  
-**Trạng thái:** Draft — chờ review  
+**Trạng thái:** Updated — App Blocking mechanic added  
 **Version:** Full Product (không phải MVP)
 
 ---
@@ -41,9 +41,12 @@ Nền tảng 2 vai:
 
 | Nền tảng | Đối tượng | Công nghệ |
 |---|---|---|
-| **Mobile App (iOS + Android)** | Trẻ em (app chơi) + Bố mẹ (app duyệt nhanh) | Flutter |
+| **Mobile App iOS** | Trẻ em (app chơi + khoá app) + Bố mẹ (duyệt nhanh) | Flutter + Swift Native Extension |
+| **Mobile App Android** | Giai đoạn 2 — sau iOS ổn định | Flutter + Accessibility Service |
 | **Web Dashboard** | Bố mẹ (setup, báo cáo chi tiết) | Laravel 11 + Vue 3 + Inertia.js |
 | **Backend API** | Phục vụ cả Flutter lẫn Web | Laravel 11 REST API |
+
+> **iOS-first:** Ra mắt iOS trước vì Apple có API chính thức (`Family Controls` entitlement). Android sẽ phát triển sau.
 
 ---
 
@@ -180,10 +183,39 @@ Không làm nhiệm vụ 2 ngày → thú cưng animation "buồn, có mưa nh�
 - Trẻ nhận thông báo + hiện trên màn hình: sticker nổi lên với animation bounce
 - Lưu lại trong "Nhật ký khen" — trẻ xem lại được
 
-#### Đổi phần thưởng
-- Xem danh sách phần thưởng bố mẹ tạo
-- Đổi → Sao trừ → bố mẹ nhận thông báo để thực hiện
-- Xem lịch sử đã đổi
+#### Hệ thống App Blocking (Cơ chế cốt lõi)
+
+Đây là **vòng lặp chính** của toàn sản phẩm — không phải honor system:
+
+```
+Bố mẹ cài danh sách app bị khoá (YouTube, TikTok, game...)
+→ KidTime dùng iOS Screen Time API khoá các app đó
+→ Bé muốn xem YouTube → Hiện màn hình Shield của KidTime
+→ Bé làm nhiệm vụ → Kiếm Sao ⭐
+→ Đủ Sao → KidTime tự động mở khoá → Bé xem được
+→ Hết thời gian / hết Sao → Khoá lại tự động
+```
+
+**2 loại phần thưởng bố mẹ tạo:**
+
+| Loại | Cơ chế | Ví dụ |
+|---|---|---|
+| ⏱️ **Thời gian màn hình** | Khoá kỹ thuật, tự mở theo Sao | "5 ⭐ = 30 phút YouTube" |
+| 🎁 **Phần thưởng thực tế** | Honor system (bố mẹ thực hiện tay) | "20 ⭐ = đi ăn kem cuối tuần" |
+
+**Trạng thái khi bé hết Sao (available_stars = 0):**
+- Tất cả app trong danh sách bị khoá bởi iOS
+- Bé mở YouTube → Hiện màn hình Shield tùy chỉnh của KidTime
+- Shield hiện: thú cưng buồn + câu "Hết Sao rồi 😢 Hãy làm nhiệm vụ để mở khoá nhé!"
+- Nút duy nhất: "Về KidTime làm nhiệm vụ" → mở app KidTime
+- Bé hoàn thành nhiệm vụ → Kiếm Sao → App tự mở khoá ngay
+
+**iOS Technical Stack cho App Blocking:**
+- Framework: `FamilyControls` + `ManagedSettings` + `DeviceActivity` (iOS 16+)
+- Yêu cầu: `Family Controls entitlement` (phải xin Apple cấp)
+- Native extension: `ShieldConfigurationExtension` (tùy chỉnh màn hình khoá)
+- Native extension: `DeviceActivityMonitorExtension` (background monitoring)
+- Bridge: Flutter ↔ Swift qua `MethodChannel`
 
 ---
 
@@ -215,8 +247,14 @@ Không làm nhiệm vụ 2 ngày → thú cưng animation "buồn, có mưa nh�
 - Cài lịch lặp (một lần / hàng ngày / theo tuần)
 - Chọn chế độ xác nhận: 📸 Ảnh / 🔑 PIN / ✅ Tự động
 
+#### Quản lý App Blocking
+- Bố mẹ chọn **danh sách app bị khoá** từ danh sách app đã cài trên điện thoại con (qua `FamilyActivityPicker` của iOS)
+- Cài quy tắc: khoá hoàn toàn khi Sao = 0, hoặc khoá từ khung giờ cụ thể (VD: sau 9pm)
+- Xem lịch sử thời gian bé dùng từng app
+
 #### Quản lý phần thưởng
-- Tạo phần thưởng: tên, mô tả, số Sao cần đổi
+- **Thời gian màn hình:** Tạo gói "X ⭐ = Y phút" cho từng app (VD: "5 ⭐ = 30 phút YouTube")
+- **Phần thưởng thực tế:** Tạo phần thưởng honor system (VD: "20 ⭐ = đi ăn kem")
 - Kích hoạt / tắt phần thưởng
 
 #### Báo cáo & Phân tích (đẹp, chi tiết)
@@ -239,7 +277,23 @@ Không làm nhiệm vụ 2 ngày → thú cưng animation "buồn, có mưa nh�
 
 ---
 
-## 7. Kiếm tiền (Monetization — định hướng sau)
+## 7. Yêu cầu kỹ thuật đặc biệt (iOS)
+
+### Family Controls Entitlement
+- Phải đăng ký và được Apple phê duyệt trước khi submit App Store
+- Cần cung cấp: mô tả use case, privacy policy, mục đích dùng API
+- Thời gian phê duyệt: thường 1–2 tuần
+- Link đăng ký: https://developer.apple.com/contact/request/family-controls-distribution
+
+### iOS Extensions cần tạo
+| Extension | Chức năng |
+|---|---|
+| `ShieldConfigurationExtension` | Tùy chỉnh màn hình hiện khi app bị khoá |
+| `DeviceActivityMonitorExtension` | Chạy nền, theo dõi & khoá/mở app tự động |
+
+---
+
+## 8. Kiếm tiền (Monetization — định hướng sau)
 
 Miễn phí hoàn toàn trong giai đoạn đầu. Hướng tiềm năng sau:
 - Premium subscription: báo cáo nâng cao, nhiều trẻ hơn, skin độc quyền
@@ -247,12 +301,14 @@ Miễn phí hoàn toàn trong giai đoạn đầu. Hướng tiềm năng sau:
 
 ---
 
-## 8. Success Criteria
+## 9. Success Criteria
 
+- App blocking hoạt động ổn định, không bypass được
 - Trẻ tự mở app mỗi ngày không cần nhắc
 - Streak trung bình ≥ 5 ngày sau tuần đầu
 - Bố mẹ duyệt nhiệm vụ qua app mobile, không cần mở web hàng ngày
 - Trẻ đạt rank Silver trong 30 ngày đầu
+- Giảm thời gian màn hình ngoài kế hoạch ≥ 30% so với trước khi dùng app
 
 ---
 
