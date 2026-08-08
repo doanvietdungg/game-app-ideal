@@ -1,6 +1,7 @@
-# KidTime — Design Spec
+# KidTime — Design Spec (Full Version)
 **Ngày:** 2026-08-09  
-**Trạng thái:** Draft — chờ review
+**Trạng thái:** Draft — chờ review  
+**Version:** Full Product (không phải MVP)
 
 ---
 
@@ -20,8 +21,8 @@ Trẻ em Việt Nam (6–10 tuổi) ngày càng nghiện điện thoại / màn 
 ## 2. Giải pháp — KidTime
 
 Nền tảng 2 vai:
-- **Bố mẹ** = người quản lý: tạo nhiệm vụ, cài phần thưởng, duyệt, xem báo cáo
-- **Trẻ em** = người chơi game: hoàn thành nhiệm vụ, kiếm Sao ⭐, nuôi thú cưng ảo, đổi phần thưởng
+- **Bố mẹ** = người quản lý: tạo nhiệm vụ, cài phần thưởng, duyệt, xem báo cáo phân tích sâu
+- **Trẻ em** = người chơi game: hoàn thành nhiệm vụ, kiếm Sao ⭐, nuôi thú cưng ảo, đổi phần thưởng, xây dựng streak
 
 ---
 
@@ -46,25 +47,85 @@ Nền tảng 2 vai:
 
 ---
 
-## 5. Tính năng cốt lõi
+## 5. Design Visual
 
-### 5.1 App Trẻ em (Flutter)
+### 5.1 Phong cách
+
+**Cute & Pastel — Animal Crossing / Pokémon inspired**
+
+- **Màu sắc:** Pastel ấm (peach, mint, lavender, butter yellow, baby blue) — không dùng màu nguyên chất chói
+- **Typography:** Bo tròn, thân thiện — font như Nunito / Fredoka One
+- **Hình dạng:** Bo góc nhiều, không có cạnh sắc
+- **Nhân vật:** Chibi-style, mắt to, biểu cảm rõ ràng
+- **Background:** Gradient nhẹ, có texture hạt nhỏ (grain texture) tạo cảm giác ấm áp
+- **Icons:** Line icon bo tròn, stroke dày, có shadow nhẹ
+
+### 5.2 Animation nguyên tắc
+
+Tất cả animation tuân theo **"Snappy & Bouncy"** — nhanh khi bắt đầu, nảy nhẹ khi dừng:
+
+| Loại | Mô tả kỹ thuật |
+|---|---|
+| **Idle thú cưng** | Loop breathing + eye blink, 60fps, Rive animation |
+| **Nhận Sao** | Particle burst hình sao + scale up/down bounce + âm thanh |
+| **Hoàn thành nhiệm vụ** | Checkmark draw animation → thú cưng jump + heart pop |
+| **Lên cấp thú cưng** | Full-screen cutscene: sparkles → morph shape → confetti shower |
+| **Streak mới** | Flame animation 🔥 + số đếm bounce lên |
+| **Chuyển màn hình** | Slide + spring physics (damping 0.7) |
+| **Button tap** | Scale down 0.92 → release bounce |
+| **Phần thưởng mở khóa** | Gift box mở → ribbon bay → nội dung xuất hiện |
+| **Thú cưng buồn (2 ngày không làm)** | Slow droop animation + rain drops trên đầu |
+
+### 5.3 Thú cưng — 6 loài
+
+| Loài | Màu chủ đạo | Cá tính |
+|---|---|---|
+| 🐱 Mèo | Orange pastel | Lười biếng dễ thương, ngủ gật khi idle |
+| 🐰 Thỏ | Pink pastel | Nhảy nhảy liên tục, tai vểnh |
+| 🐻 Gấu | Brown pastel | Chậm chạp, ôm bụng, cute |
+| 🦕 Khủng long | Mint green | Nghịch ngợm, đuôi vẫy |
+| 🐧 Chim cánh cụt | Blue/white | Waddle animation, hay trượt ngã |
+| 🐲 Rồng nhỏ | Purple pastel | Phun lửa nhỏ khi vui, hiếm/đặc biệt |
+
+Mỗi loài có **4 skin/trang phục** mở khóa bằng Sao:
+- Default (miễn phí)
+- Mùa hè (áo phao, kính mát)
+- Mùa đông (khăn quàng, mũ len)
+- Đặc biệt (trang phục siêu anh hùng / hoàng gia)
+
+### 5.4 Màu sắc cho từng nhóm
+
+**App trẻ em (Flutter):**
+- Primary: `#FFB347` (Peach Orange)
+- Secondary: `#A8E6CF` (Mint Green)
+- Accent: `#FFD3E8` (Baby Pink)
+- Background: `#FFFBF0` (Warm White)
+- Text: `#3D2B1F` (Warm Brown)
+
+**Web Dashboard bố mẹ (Laravel + Vue):**
+- Primary: `#6C63FF` (Soft Indigo)
+- Secondary: `#48CAE4` (Sky Blue)
+- Background: `#F8F9FF` (Cool White)
+- Surface: `#FFFFFF`
+- Text: `#1A1A2E`
+
+---
+
+## 6. Tính năng đầy đủ
+
+### 6.1 App Trẻ em (Flutter)
 
 #### Màn hình chính
-- Thú cưng ảo hiển thị trung tâm với idle animation (thở nhẹ, nhảy nhẹ)
-- Thanh Sao hiện tại + tiến trình lên cấp thú cưng
-- Danh sách nhiệm vụ hôm nay (có thể cuộn)
-- Nút "Đổi phần thưởng" góc phải
+- Thú cưng ảo hiển thị trung tâm với idle animation liên tục
+- Thanh Sao hiện tại + progress bar lên cấp
+- Streak counter 🔥 (chuỗi ngày liên tiếp)
+- Level / Rank badge (Bronze → Silver → Gold → Platinum → Diamond)
+- Danh sách nhiệm vụ hôm nay (cuộn ngang theo danh mục)
+- Nút "Đổi phần thưởng" + "Tủ đồ thú cưng"
 
 #### Hệ thống nhiệm vụ
 
-Mỗi nhiệm vụ có:
-- Tên + icon danh mục
-- Số Sao thưởng khi hoàn thành
-- Chế độ xác nhận (xem mục 5.3)
-- Trạng thái: Chờ làm / Đã nộp / Đã duyệt / Bị từ chối
-
-**5 danh mục nhiệm vụ mẫu:**
+**5 danh mục + lặp lịch:**
 
 | Danh mục | Icon | Ví dụ nhiệm vụ | Stars |
 |---|---|---|---|
@@ -74,97 +135,124 @@ Mỗi nhiệm vụ có:
 | 🥦 Ăn uống | 🍱 | Ăn hết rau, ăn đúng giờ | 2–3 ⭐ |
 | 😴 Giấc ngủ | 🌙 | Tắt điện thoại trước 9h, ngủ đúng giờ | 3–4 ⭐ |
 
+Nhiệm vụ có thể cài **lặp lịch:**
+- Một lần
+- Hàng ngày (VD: "Đánh răng buổi tối")
+- Các ngày trong tuần (VD: "Học bài — Thứ 2–6")
+- Hàng tuần (VD: "Dọn phòng — mỗi Chủ nhật")
+
 #### Hệ thống Sao ⭐
-- Trẻ kiếm Sao bằng cách hoàn thành nhiệm vụ được duyệt
-- Sao tích lũy, không mất theo ngày
-- Dùng Sao đổi phần thưởng do bố mẹ định nghĩa
+- Tích lũy, không mất theo ngày
+- Dùng đổi phần thưởng bố mẹ tạo + skin thú cưng
+- Hiển thị lịch sử kiếm/tiêu Sao
+
+#### Streak 🔥
+- Đếm số ngày liên tiếp hoàn thành ít nhất 1 nhiệm vụ
+- Milestone streak (7 ngày, 30 ngày, 100 ngày) → thưởng Sao bonus lớn + animation đặc biệt
+- Nếu bỏ 1 ngày → streak về 0
+
+#### Hệ thống Level / Rank
+
+| Rank | Yêu cầu Sao tích lũy | Badge màu |
+|---|---|---|
+| 🥉 Bronze | 0–99 ⭐ | Nâu ấm |
+| 🥈 Silver | 100–299 ⭐ | Bạc sáng |
+| 🥇 Gold | 300–699 ⭐ | Vàng |
+| 💎 Platinum | 700–1499 ⭐ | Tím platinum |
+| 👑 Diamond | 1500+ ⭐ | Xanh kim cương |
 
 #### Thú cưng ảo (Tamagotchi-style)
-- Mỗi trẻ có 1 thú cưng riêng (chọn loài khi đăng ký: mèo / thỏ / gấu...)
-- **3 giai đoạn phát triển:** Nhỏ → Thiếu niên → Trưởng thành (mỗi giai đoạn cần đủ Sao tích lũy)
-- **3 trạng thái hàng ngày:**
-  - 😴 Buồn ngủ / Ủ rũ — không làm nhiệm vụ nào hôm nay
-  - 😊 Bình thường — làm ít nhất 1 nhiệm vụ
-  - 🥳 Phấn khích / Nhảy múa — hoàn thành ≥ 3 nhiệm vụ
-- Không làm nhiệm vụ 2 ngày liên tiếp → thú cưng có animation "buồn, xỉu" → trẻ muốn quay lại
 
-#### Animation trọng tâm
-- **Idle:** Thú cưng thở nhẹ, chớp mắt, nhúc nhích liên tục
-- **Nhận Sao:** Mưa sao vàng rơi xuống + âm thanh vui
-- **Lên cấp thú cưng:** Cutscene ngắn biến đổi hình dạng + confetti
-- **Hoàn thành nhiệm vụ:** Checkmark animation + thú cưng nhảy múa
-- **Chuyển màn hình:** Slide mượt + bounce effect
+**3 giai đoạn phát triển:**
+- Giai đoạn 1 — Baby: 0–99 Sao tích lũy
+- Giai đoạn 2 — Teen: 100–399 Sao tích lũy
+- Giai đoạn 3 — Adult: 400+ Sao tích lũy
+
+**3 trạng thái hàng ngày:**
+- 😴 Ủ rũ — không làm nhiệm vụ nào
+- 😊 Vui — hoàn thành 1–2 nhiệm vụ
+- 🥳 Siêu vui / nhảy múa — hoàn thành ≥ 3 nhiệm vụ
+
+Không làm nhiệm vụ 2 ngày → thú cưng animation "buồn, có mưa nhỏ trên đầu"
+
+#### Lời khen từ bố mẹ
+- Bố mẹ gửi sticker / emoji praise khi duyệt nhiệm vụ
+- Trẻ nhận thông báo + hiện trên màn hình: sticker nổi lên với animation bounce
+- Lưu lại trong "Nhật ký khen" — trẻ xem lại được
 
 #### Đổi phần thưởng
-- Trẻ xem danh sách phần thưởng bố mẹ tạo (tên + số Sao cần)
-- Bấm "Đổi" → xác nhận → Sao bị trừ → bố mẹ nhận thông báo
-- Bố mẹ thực hiện phần thưởng trong thực tế (không cần unlock kỹ thuật)
+- Xem danh sách phần thưởng bố mẹ tạo
+- Đổi → Sao trừ → bố mẹ nhận thông báo để thực hiện
+- Xem lịch sử đã đổi
 
 ---
 
-### 5.2 App Bố mẹ (Flutter — cùng app, role riêng)
+### 6.2 App Bố mẹ (Flutter — cùng app, role riêng)
 
-> **Quyết định kiến trúc:** Bố mẹ và trẻ em dùng **cùng 1 app Flutter**, phân biệt bằng vai trò khi đăng nhập. Trẻ đăng nhập bằng PIN đơn giản. Bố mẹ đăng nhập bằng email/mật khẩu.
+> **Kiến trúc:** 1 app Flutter, phân role khi đăng nhập. Trẻ: PIN 4 số. Bố mẹ: email + password.
 
-#### Tính năng bố mẹ trên app mobile
-- **Thông báo duyệt nhiệm vụ:** nhận push notification → vuốt → duyệt / từ chối ngay
-- **Xem nhanh:** Sao con hiện tại, nhiệm vụ hôm nay, trạng thái thú cưng
-- **Duyệt ảnh:** xem ảnh trẻ nộp kèm nhiệm vụ
+#### Trang chủ bố mẹ (mobile)
+- Tổng quan nhanh: Sao từng con hôm nay, streak, trạng thái thú cưng
+- Nhiệm vụ chờ duyệt (badge đỏ)
+- Phần thưởng đang chờ thực hiện
 
-#### Tính năng bố mẹ trên Web Dashboard
-- Quản lý hồ sơ trẻ (thêm, sửa, xóa)
-- Tạo / chỉnh sửa nhiệm vụ (chọn từ thư viện mẫu hoặc tự tạo)
-- Cài phần thưởng (tên, mô tả, số Sao cần đổi)
-- Xem báo cáo tuần: số nhiệm vụ hoàn thành, Sao kiếm / đã đổi, biểu đồ theo ngày
-- Cài đặt tài khoản gia đình
+#### Duyệt nhiệm vụ
+- Push notification → vuốt → [✅ Duyệt + 💬 Gửi sticker] [❌ Từ chối + lý do]
+- Xem ảnh trước khi duyệt
+- Gửi kèm lời khen / sticker khi duyệt
 
 ---
 
-### 5.3 Hệ thống xác nhận nhiệm vụ (3 chế độ)
+### 6.3 Web Dashboard bố mẹ (Laravel + Vue)
 
-Bố mẹ chọn chế độ khi **tạo nhiệm vụ:**
+#### Quản lý gia đình
+- Thêm tối đa 5 trẻ trong 1 tài khoản gia đình
+- Mỗi trẻ có hồ sơ riêng: tên, tuổi, avatar, loại thú cưng
 
-| Chế độ | Khi nào dùng | Luồng xác nhận |
+#### Quản lý nhiệm vụ
+- Thư viện mẫu sẵn có (phân theo danh mục)
+- Tạo nhiệm vụ tùy chỉnh
+- Cài lịch lặp (một lần / hàng ngày / theo tuần)
+- Chọn chế độ xác nhận: 📸 Ảnh / 🔑 PIN / ✅ Tự động
+
+#### Quản lý phần thưởng
+- Tạo phần thưởng: tên, mô tả, số Sao cần đổi
+- Kích hoạt / tắt phần thưởng
+
+#### Báo cáo & Phân tích (đẹp, chi tiết)
+- **Dashboard tuần:** Sao kiếm/tiêu, nhiệm vụ hoàn thành, streak
+- **Biểu đồ cột:** Hoạt động theo ngày trong tuần
+- **Biểu đồ tròn:** Phân bổ theo danh mục nhiệm vụ
+- **Timeline:** Lịch sử hoạt động theo ngày
+- **So sánh tuần trước:** % thay đổi
+- Xuất báo cáo PDF (tính năng cao cấp)
+
+---
+
+### 6.4 Hệ thống xác nhận 3 chế độ
+
+| Chế độ | Khi nào dùng | Luồng |
 |---|---|---|
-| 📸 **Ảnh chứng minh** | Bố mẹ không ở cạnh con | Con chụp ảnh → nộp → Bố mẹ duyệt qua app (push notification) |
-| 🔑 **PIN bố mẹ** | Bố mẹ ở cạnh, không muốn mở app | Con bấm "Xong" → Màn hình hiện ô nhập PIN → Bố mẹ nhập PIN 4 số → Sao cộng ngay |
-| ✅ **Tự động** | Bố mẹ hoàn toàn tin tưởng | Con bấm "Xong" → Sao cộng ngay, không xác nhận thêm |
-
-**Luồng duyệt push notification (chế độ Ảnh):**
-```
-Con bấm Nộp ảnh
-→ Bố mẹ nhận: "Bé Nam vừa nộp: Dọn phòng 🧹 [Xem ảnh]"
-→ Vuốt notification → Hiện ảnh + [✅ Duyệt] [❌ Từ chối]
-→ Bố mẹ bấm Duyệt
-→ Con nhận Sao ngay + thú cưng nhảy vui
-```
+| 📸 **Ảnh chứng minh** | Bố mẹ không ở cạnh | Con chụp ảnh → nộp → Bố mẹ duyệt qua push notification |
+| 🔑 **PIN bố mẹ** | Bố mẹ ở cạnh | Con bấm "Xong" → Màn hình PIN → Bố mẹ nhập 4 số → Sao cộng ngay |
+| ✅ **Tự động** | Hoàn toàn tin tưởng | Con bấm "Xong" → Sao cộng ngay |
 
 ---
 
-## 6. Kiếm tiền (Monetization)
+## 7. Kiếm tiền (Monetization — định hướng sau)
 
-**MVP:** Miễn phí hoàn toàn — tập trung xây dựng user base và validate sản phẩm trước.
-
-*(Hướng monetization sẽ được xem xét sau khi có traction)*
-
----
-
-## 7. Những gì KHÔNG có trong MVP
-
-- AI xác minh ảnh tự động (giữ lại bố mẹ duyệt thủ công — đơn giản hơn, tin cậy hơn)
-- Nhiều trẻ / nhiều gia đình trong 1 tài khoản (MVP: 1 tài khoản = 1 gia đình, tối đa 2 trẻ)
-- Leaderboard / so sánh với trẻ khác
-- Tích hợp mở khóa kỹ thuật với app bên thứ ba (YouTube, game...)
-- Thú cưng bị "chết" nếu không chăm (giữ trải nghiệm tích cực, không gây stress)
+Miễn phí hoàn toàn trong giai đoạn đầu. Hướng tiềm năng sau:
+- Premium subscription: báo cáo nâng cao, nhiều trẻ hơn, skin độc quyền
+- Skin thú cưng theo mùa / sự kiện đặc biệt
 
 ---
 
 ## 8. Success Criteria
 
-- Trẻ tự mở app mỗi ngày mà không cần bố mẹ nhắc
-- Bố mẹ không cần mở web để xử lý tác vụ hàng ngày thông thường
-- Trẻ hoàn thành ≥ 3 nhiệm vụ/tuần
-- Thú cưng đạt giai đoạn 2 (Thiếu niên) trong vòng 30 ngày dùng liên tục
+- Trẻ tự mở app mỗi ngày không cần nhắc
+- Streak trung bình ≥ 5 ngày sau tuần đầu
+- Bố mẹ duyệt nhiệm vụ qua app mobile, không cần mở web hàng ngày
+- Trẻ đạt rank Silver trong 30 ngày đầu
 
 ---
 
