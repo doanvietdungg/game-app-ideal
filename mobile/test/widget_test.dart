@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/main.dart';
 import 'package:mobile/features/home/presentation/home_screen.dart';
+import 'package:mobile/features/tasks/presentation/task_list_screen.dart';
 
 void main() {
   testWidgets('KidTimeApp mounts and displays splash screen subtitle', (WidgetTester tester) async {
@@ -34,5 +35,25 @@ void main() {
     // Verify quick action button labels
     expect(find.text('Đổi quà'), findsOneWidget);
     expect(find.text('Tủ đồ'), findsOneWidget);
+  });
+
+  testWidgets('TaskListScreen mounts and displays tasks by categories', (WidgetTester tester) async {
+    // Build the TaskListScreen directly in a MaterialApp wrapper
+    await tester.pumpWidget(const MaterialApp(
+      home: TaskListScreen(),
+    ));
+
+    // Verify app bar title
+    expect(find.text('📋 Nhiệm vụ của con'), findsOneWidget);
+
+    // Verify category tabs are present
+    expect(find.text('Tất cả'), findsOneWidget);
+    expect(find.text('🏠 Việc nhà'), findsOneWidget);
+    expect(find.text('📚 Học tập'), findsOneWidget);
+
+    // Verify some task items from all category list
+    expect(find.text('Dọn dẹp phòng ngủ'), findsOneWidget);
+    expect(find.text('Đọc sách 20 phút'), findsOneWidget);
+    expect(find.text('Ăn hết rau xanh'), findsOneWidget);
   });
 }

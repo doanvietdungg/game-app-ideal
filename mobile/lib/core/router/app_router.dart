@@ -5,6 +5,7 @@ import '../../features/auth/presentation/role_selection_screen.dart';
 import '../../features/auth/presentation/parent_login_screen.dart';
 import '../../features/auth/presentation/child_login_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
+import '../../features/tasks/presentation/task_list_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/splash',
@@ -28,6 +29,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/home',
       builder: (context, state) => const HomeScreen(),
+    ),
+    GoRoute(
+      path: '/tasks',
+      builder: (context, state) => const TaskListScreen(),
     ),
   ],
 );

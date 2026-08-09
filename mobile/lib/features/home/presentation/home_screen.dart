@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -18,7 +19,7 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 24),
               _buildPetCanvas(),
               const SizedBox(height: 28),
-              _buildTodayTasksSection(),
+              _buildTodayTasksSection(context),
               const SizedBox(height: 28),
               _buildQuickActions(context),
             ],
@@ -211,7 +212,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTodayTasksSection() {
+  Widget _buildTodayTasksSection(BuildContext context) {
     final List<Map<String, dynamic>> mockTasks = [
       {'title': 'Dọn dẹp phòng', 'stars': 5, 'emoji': '🏠', 'color': const Color(0xFFFFB347)},
       {'title': 'Đọc sách 20 phút', 'stars': 10, 'emoji': '📚', 'color': const Color(0xFF87CEEB)},
@@ -221,12 +222,21 @@ class HomeScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '📋 Việc hôm nay của con',
-          style: TextStyle(
-            color: AppTheme.text,
-            fontSize: 18,
-            fontWeight: FontWeight.w900,
+        GestureDetector(
+          onTap: () => context.push('/tasks'),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '📋 Việc hôm nay của con',
+                style: TextStyle(
+                  color: AppTheme.text,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppTheme.textLight),
+            ],
           ),
         ),
         const SizedBox(height: 14),
@@ -237,7 +247,7 @@ class HomeScreen extends StatelessWidget {
             itemCount: mockTasks.length,
             itemBuilder: (context, index) {
               final task = mockTasks[index];
-              return _buildTaskCard(task);
+              return _buildTaskCard(context, task);
             },
           ),
         ),
@@ -245,25 +255,27 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTaskCard(Map<String, dynamic> task) {
-    return Container(
-      width: 140,
-      margin: const EdgeInsets.only(right: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: const Color(0xFFFFF2D6), width: 1.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildTaskCard(BuildContext context, Map<String, dynamic> task) {
+    return GestureDetector(
+      onTap: () => context.push('/tasks'),
+      child: Container(
+        width: 140,
+        margin: const EdgeInsets.only(right: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+          border: Border.all(color: const Color(0xFFFFF2D6), width: 1.5),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             width: 36,
@@ -298,8 +310,9 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildQuickActions(BuildContext context) {
     return Column(
