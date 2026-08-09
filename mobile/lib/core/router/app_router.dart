@@ -9,6 +9,7 @@ import '../../features/tasks/presentation/task_list_screen.dart';
 import '../../features/tasks/presentation/task_detail_screen.dart';
 import '../../features/pet/presentation/pet_screen.dart';
 import '../../features/pet/presentation/store_screen.dart';
+import '../../features/rewards/presentation/reward_list_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/splash',
@@ -53,5 +54,10 @@ final appRouter = GoRouter(
       path: '/store',
       builder: (context, state) => const StoreScreen(),
     ),
+    GoRoute(
+      path: '/rewards',
+      builder: (context, state) => const RewardListScreen(),
+    ),
   ],
 );
+
