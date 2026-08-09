@@ -11,6 +11,7 @@ import 'package:mobile/features/rewards/presentation/reward_list_screen.dart';
 import 'package:mobile/features/stats/presentation/stats_screen.dart';
 import 'package:mobile/features/parent/presentation/parent_approval_screen.dart';
 import 'package:mobile/features/notifications/presentation/notification_center_screen.dart';
+import 'package:mobile/features/gallery/presentation/praise_gallery_screen.dart';
 import 'package:mobile/core/services/app_blocking_service.dart';
 
 void main() {
@@ -189,6 +190,18 @@ void main() {
 
     expect(find.text('Thông Báo 🔔'), findsOneWidget);
     expect(find.text('🎉 Bài tập đã được duyệt!'), findsOneWidget);
+  });
+
+  testWidgets('PraiseGalleryScreen mounts and displays photo feed', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: PraiseGalleryScreen(),
+    ));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Góc Kỷ Niệm & Lời Khen 💖'), findsOneWidget);
+    expect(find.text('Dọn dẹp phòng ngủ 🏠'), findsOneWidget);
+    expect(find.text('Xuất sắc!'), findsOneWidget);
   });
 
   test('AppBlockingService handles missing plugin gracefully in test env', () async {
