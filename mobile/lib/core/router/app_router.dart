@@ -12,6 +12,7 @@ import '../../features/pet/presentation/store_screen.dart';
 import '../../features/rewards/presentation/reward_list_screen.dart';
 import '../../features/stats/presentation/stats_screen.dart';
 import '../../features/parent/presentation/parent_approval_screen.dart';
+import '../../features/notifications/presentation/notification_center_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/splash',
@@ -68,8 +69,13 @@ final appRouter = GoRouter(
       path: '/parent/approval',
       builder: (context, state) => const ParentApprovalScreen(),
     ),
+    GoRoute(
+      path: '/notifications',
+      builder: (context, state) => const NotificationCenterScreen(),
+    ),
   ],
 );
+
 
 
 
