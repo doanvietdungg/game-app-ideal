@@ -8,6 +8,8 @@ use KidTime\Domain\Child\Enums\PetStage;
 
 class Pet
 {
+    private array $unlockedSkins = ['default'];
+
     public function __construct(
         private ?int $id,
         private int $childId,
@@ -20,6 +22,28 @@ class Pet
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getUnlockedSkins(): array
+    {
+        return $this->unlockedSkins;
+    }
+
+    public function setUnlockedSkins(array $skins): void
+    {
+        $this->unlockedSkins = $skins;
+    }
+
+    public function unlockSkin(string $skinName): void
+    {
+        if (!in_array($skinName, $this->unlockedSkins)) {
+            $this->unlockedSkins[] = $skinName;
+        }
+    }
+
+    public function changeSkin(string $skinName): void
+    {
+        $this->activeSkin = $skinName;
     }
 
     public function getChildId(): int

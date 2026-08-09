@@ -58,4 +58,34 @@ class Child
         $this->availableStars -= $stars;
         return true;
     }
+
+    public function updateStreak(\DateTimeInterface $today): void
+    {
+        if ($this->lastTaskDate === null) {
+            $this->streakDays = 1;
+        } else {
+            // Check diff in days
+            $todayDate = new \DateTimeImmutable($today->format('Y-m-d'));
+            $lastDate = new \DateTimeImmutable($this->lastTaskDate->format('Y-m-d'));
+            $diff = $todayDate->diff($lastDate)->days;
+            if ($diff === 1) {
+                $this->streakDays += 1;
+            } elseif ($diff > 1) {
+                $this->streakDays = 1;
+            }
+        }
+        $this->lastTaskDate = $today;
+    }
+
+    public function checkStreakExpiry(\DateTimeInterface $today): void
+    {
+        if ($this->lastTaskDate !== null) {
+            $todayDate = new \DateTimeImmutable($today->format('Y-m-d'));
+            $lastDate = new \DateTimeImmutable($this->lastTaskDate->format('Y-m-d'));
+            $diff = $todayDate->diff($lastDate)->days;
+            if ($diff > 1) {
+                $this->streakDays = 0;
+            }
+        }
+    }
 }
