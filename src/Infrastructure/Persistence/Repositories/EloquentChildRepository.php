@@ -62,6 +62,11 @@ class EloquentChildRepository implements ChildRepositoryInterface
     {
         $pet = null;
         if ($model->pet) {
+            $unlockedSkins = \Illuminate\Support\Facades\DB::table('pet_skins')
+                ->where('pet_id', $model->pet->id)
+                ->pluck('skin_name')
+                ->toArray();
+
             $pet = new Pet(
                 $model->pet->id,
                 $model->pet->child_id,
@@ -70,6 +75,7 @@ class EloquentChildRepository implements ChildRepositoryInterface
                 $model->pet->active_skin,
                 $model->pet->mood
             );
+            $pet->setUnlockedSkins(array_merge(['default'], $unlockedSkins));
         }
 
         return new Child(
