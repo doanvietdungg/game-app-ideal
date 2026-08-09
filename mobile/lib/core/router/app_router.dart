@@ -17,6 +17,7 @@ import '../../features/gallery/presentation/praise_gallery_screen.dart';
 import '../../features/pet/presentation/pet_selection_screen.dart';
 import '../../features/leaderboard/presentation/family_leaderboard_screen.dart';
 import '../../features/profile/presentation/profile_settings_screen.dart';
+import '../../features/tasks/presentation/task_timer_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/splash',
@@ -44,6 +45,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/tasks',
       builder: (context, state) => const TaskListScreen(),
+    ),
+    GoRoute(
+      path: '/tasks/timer',
+      builder: (context, state) => const TaskTimerScreen(),
     ),
     GoRoute(
       path: '/tasks/:id',
@@ -95,6 +100,7 @@ final appRouter = GoRouter(
     ),
   ],
 );
+
 
 
 
