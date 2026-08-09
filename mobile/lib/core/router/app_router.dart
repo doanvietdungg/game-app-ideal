@@ -14,6 +14,7 @@ import '../../features/stats/presentation/stats_screen.dart';
 import '../../features/parent/presentation/parent_approval_screen.dart';
 import '../../features/notifications/presentation/notification_center_screen.dart';
 import '../../features/gallery/presentation/praise_gallery_screen.dart';
+import '../../features/pet/presentation/pet_selection_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/splash',
@@ -55,6 +56,10 @@ final appRouter = GoRouter(
       builder: (context, state) => const PetScreen(),
     ),
     GoRoute(
+      path: '/pet/select',
+      builder: (context, state) => const PetSelectionScreen(),
+    ),
+    GoRoute(
       path: '/store',
       builder: (context, state) => const StoreScreen(),
     ),
@@ -80,6 +85,7 @@ final appRouter = GoRouter(
     ),
   ],
 );
+
 
 
 
