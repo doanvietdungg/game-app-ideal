@@ -15,13 +15,14 @@ const flash = computed(() => page.props.flash)
       <!-- Logo -->
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center gap-3">
-          <img src="/kid-time-logo.svg" alt="KidTime Logo" class="w-10 h-10 rounded-xl shadow-md object-contain" />
+          <img src="/images/admin-logo.png" alt="KidTime Admin Logo" class="w-10 h-10 rounded-xl shadow-md object-contain" />
           <div>
             <span class="font-extrabold text-xl text-gray-800 tracking-tight">KidTime</span>
             <p class="text-[10px] uppercase font-extrabold text-primary tracking-wider">Parent Hub</p>
           </div>
         </div>
       </div>
+
 
 
       <!-- Navigation Links -->
