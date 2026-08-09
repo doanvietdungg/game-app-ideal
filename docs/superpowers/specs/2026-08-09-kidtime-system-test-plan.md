@@ -1,258 +1,309 @@
-# KidTime — Kế Hoạch Kiểm Thử Toàn Bộ Hệ Thống (Master System Test Plan)
+# KidTime — Kiểm Thử Thủ Công Toàn Bộ Hệ Thống (Manual QA Test Cases)
 
-Tài liệu thiết kế chi tiết toàn bộ Test Case kiểm thử hệ thống KidTime, bao phủ 3 tầng:
-- **Tầng 1**: Backend Laravel API (PHPUnit Feature + Unit Tests)
-- **Tầng 2**: Web Dashboard Phụ huynh (Inertia Vue — Laravel Feature Tests)
-- **Tầng 3**: Mobile App Trẻ em (Flutter Widget + Integration Tests)
-
----
-
-## Module 1: Xác Thực & Quản Lý Gia Đình (Auth & Family Management)
-
-### 1.1 Backend API Tests (`tests/Feature/Api/AuthApiTest.php`)
-
-| # | Test Case | Mô Tả | Input | Expected |
-|---|-----------|--------|-------|----------|
-| TC-1.1 | Đăng ký Phụ huynh thành công | POST `/v1/auth/register` | `{name, email, password, password_confirmation, family_name, family_pin}` | 201, trả về `token` + `family.id` |
-| TC-1.2 | Đăng ký trùng email | POST `/v1/auth/register` với email đã tồn tại | Email trùng | 422, lỗi validation `email already taken` |
-| TC-1.3 | Đăng ký thiếu trường bắt buộc | POST `/v1/auth/register` thiếu `family_pin` | Thiếu trường | 422, lỗi validation |
-| TC-1.4 | PIN gia đình không đúng 4 chữ số | POST `/v1/auth/register` với `family_pin: "12"` | PIN sai định dạng | 422, `pin must be 4 digits` |
-| TC-1.5 | Đăng nhập Phụ huynh thành công | POST `/v1/auth/login` | `{email, password}` hợp lệ | 200, trả về `token` |
-| TC-1.6 | Đăng nhập sai mật khẩu | POST `/v1/auth/login` sai password | Password sai | 401, `Invalid credentials` |
-| TC-1.7 | Xác minh PIN gia đình | POST `/v1/pin/verify` | `{family_id, pin}` đúng | 200, `status: true` |
-| TC-1.8 | Xác minh PIN sai | POST `/v1/pin/verify` | PIN sai | 200, `status: false` |
-| TC-1.9 | Đăng nhập trẻ em qua PIN | POST `/v1/auth/child-login` | `{family_id, pin}` | 200, danh sách trẻ em |
-| TC-1.10 | Đăng xuất Phụ huynh | POST `/v1/auth/logout` với Bearer token | Token hợp lệ | 200, token bị thu hồi |
-| TC-1.11 | Lấy thông tin `/auth/me` | GET `/v1/auth/me` với token hợp lệ | Token hợp lệ | 200, trả về thông tin user |
-| TC-1.12 | Truy cập route bảo vệ không có token | GET `/v1/auth/me` không có header | Không có token | 401, `Unauthenticated` |
-
-### 1.2 Web Dashboard Tests (`tests/Feature/Web/AuthWebTest.php`)
-
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-1.13 | Truy cập trang Login (guest) | GET `/login` | 200, render trang Login |
-| TC-1.14 | Truy cập trang Register (guest) | GET `/register` | 200, render trang Register |
-| TC-1.15 | Đăng ký web và redirect Dashboard | POST `/register` với dữ liệu hợp lệ | 302 redirect `/dashboard` |
-| TC-1.16 | Đăng nhập web và redirect Dashboard | POST `/login` với email/password đúng | 302 redirect `/dashboard` |
-| TC-1.17 | Đăng nhập web sai mật khẩu | POST `/login` sai password | 302 back + error flash |
-| TC-1.18 | Truy cập Dashboard khi chưa đăng nhập | GET `/dashboard` khi guest | 302 redirect `/login` |
-
-### 1.3 Mobile Widget Tests (`test/auth/`)
-
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-1.19 | SplashScreen hiển thị subtitle | Mount `KidTimeApp` | Hiện text `"Nhiệm vụ nhỏ · Niềm vui to"` |
-| TC-1.20 | SplashScreen auto-redirect sau 2.5s | Chờ 3 giây | Chuyển sang `/role-selection` |
-| TC-1.21 | RoleSelectionScreen hiển thị 2 vai trò | Mount `RoleSelectionScreen` | Hiện "Bé yêu" và "Bố mẹ" |
-| TC-1.22 | ChildLoginScreen nhập PIN 4 số | Nhập 4 số bất kỳ | Navigate sang `/home` |
-| TC-1.23 | ChildLoginScreen xóa PIN | Nhập 2 số rồi bấm xóa | PIN còn 1 ký tự |
+> **Chuẩn bị trước khi test:**
+> - Web Dashboard: mở `http://localhost:8000`
+> - Mobile App: mở `http://localhost:8080`
+> - Tài khoản Bố mẹ: `parent@kidtime.com` / `password123`
+> - Mã PIN trẻ em: `1234`
 
 ---
 
-## Module 2: Quản Lý Trẻ Em & Thú Cưng (Children & Pet Management)
+## Luồng 1: Đăng Nhập & Chọn Vai Trò
 
-### 2.1 Backend API Tests (`tests/Feature/Api/ChildApiTest.php`)
+### TC-1.1 — Splash Screen tự động chuyển trang
+- **Bước 1:** Mở `http://localhost:8080`
+- **Bước 2:** Quan sát màn hình Splash có logo KidTime và dòng chữ *"Nhiệm vụ nhỏ · Niềm vui to"*
+- **Bước 3:** Chờ khoảng 2-3 giây
+- **Kỳ vọng:** Tự động chuyển sang màn hình Chọn Vai Trò
 
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-2.1 | Tạo hồ sơ trẻ em | POST `/v1/children` với `{name, age, pet_species}` | 201, trả về `child.id` + `pet.species` |
-| TC-2.2 | Tạo trẻ em với loài thú cưng khác nhau | `pet_species: "cat" / "dog" / "dinosaur" / "rabbit"` | 201, pet đúng loài |
-| TC-2.3 | Danh sách trẻ em của gia đình | GET `/v1/children` | 200, mảng trẻ em thuộc `family_id` |
-| TC-2.4 | Lấy hồ sơ trẻ em | GET `/v1/children/{id}/profile` | 200, trả về name, stars, pet, streak |
-| TC-2.5 | Mở khóa skin thú cưng (đủ Sao) | POST `/v1/children/{id}/pet/skin` + `{skin_name, price}` | `status: true`, trừ Sao + skin active |
-| TC-2.6 | Mở khóa skin thú cưng (thiếu Sao) | Bé có 0 Sao, mua skin 10 Sao | `status: false`, `Not enough stars` |
-| TC-2.7 | Xóa trẻ em (Web Dashboard) | DELETE `/children/{id}` trên web | 302 redirect + bé bị xóa |
+### TC-1.2 — Chọn vai trò "Bé yêu"
+- **Bước 1:** Ở màn hình Chọn Vai Trò, bấm vào thẻ **"🧒 Bé yêu"**
+- **Kỳ vọng:** Chuyển sang màn hình chọn bé (hiện danh sách Bé Nam, Bé Linh)
 
-### 2.2 Domain Unit Tests (`tests/Unit/Domain/ChildDomainTest.php`)
+### TC-1.3 — Chọn bé và nhập PIN đúng
+- **Bước 1:** Chọn **Bé Nam 👦**
+- **Bước 2:** Nhập PIN `1234` trên bàn phím số
+- **Kỳ vọng:** Chuyển sang Trang chủ của bé, hiện *"Xin chào, Nam! 👋"*
 
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-2.8 | `awardStars()` cộng Sao và tiến hóa Pet | Cộng 150 Sao cho bé | `totalStars=150`, pet stage = `teen` |
-| TC-2.9 | `spendStars()` trừ Sao đổi quà | Bé có 20 Sao, chi 15 | `availableStars=5`, return `true` |
-| TC-2.10 | `spendStars()` không đủ Sao | Bé có 5 Sao, chi 10 | Return `false`, Sao không đổi |
-| TC-2.11 | `getRank()` trả về rank đúng | 0→bronze, 100→silver, 300→gold, 700→platinum, 1500→diamond | Đúng rank |
-| TC-2.12 | `updateStreak()` chuỗi liên tục | Làm bài ngày liên tục | `streakDays` tăng +1 mỗi ngày |
-| TC-2.13 | `checkStreakExpiry()` reset khi gián đoạn | Bỏ lỡ 2 ngày | `streakDays = 0` |
-| TC-2.14 | Pet `syncStageFromStars()` tiến hóa | 0→baby, 50→teen, 200→adult, 500→legend | Stage đúng ngưỡng |
-| TC-2.15 | Pet `unlockSkin()` mở khóa skin mới | Unlock `"robot"` | `unlockedSkins = ["default", "robot"]` |
-| TC-2.16 | Pet `unlockSkin()` trùng lặp | Unlock `"default"` lần 2 | Vẫn chỉ 1 `"default"` |
+### TC-1.4 — Nhập PIN sai rồi xóa
+- **Bước 1:** Chọn Bé Nam, nhập `12`
+- **Bước 2:** Bấm nút **Xóa (⌫)**
+- **Kỳ vọng:** PIN hiển thị chỉ còn `1` (1 chấm tròn đã điền)
 
-### 2.3 Mobile Widget Tests (`test/pet/`)
+### TC-1.5 — Chọn vai trò "Bố mẹ"
+- **Bước 1:** Quay lại màn hình Chọn Vai Trò
+- **Bước 2:** Bấm vào thẻ **"👨‍👩‍👧 Bố mẹ"**
+- **Kỳ vọng:** Chuyển sang màn hình Duyệt bài Phụ huynh
 
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-2.17 | PetSelectionScreen hiển thị 4 loài | Mount `PetSelectionScreen` | Hiện Mèo Mimi, Chó Rex, Rồng Spark, Thỏ Miffy |
-| TC-2.18 | PetScreen cho ăn trừ 2 Sao | Bấm "Cho ăn (-2 ⭐)" | Sao 45→43, Độ no 60%→75% |
-| TC-2.19 | PetScreen chọc nhột phản hồi | Bấm "Chọc nhột" | Hiện `"Hahaha, nhột quá!"` |
-| TC-2.20 | StoreScreen hiển thị & mua skin | Bấm mua Mèo Robot 15 Sao | Sao 45→30, skin unlocked |
+### TC-1.6 — Đăng nhập Web Dashboard
+- **Bước 1:** Mở `http://localhost:8000/login`
+- **Bước 2:** Nhập Email: `parent@kidtime.com`, Password: `password123`
+- **Bước 3:** Bấm **Đăng nhập**
+- **Kỳ vọng:** Chuyển sang Dashboard Bố mẹ, hiện *"Dashboard Bố mẹ"* + thống kê
 
----
+### TC-1.7 — Đăng nhập Web sai mật khẩu
+- **Bước 1:** Mở `http://localhost:8000/login`
+- **Bước 2:** Nhập Email: `parent@kidtime.com`, Password: `saimatkhau`
+- **Bước 3:** Bấm **Đăng nhập**
+- **Kỳ vọng:** Ở lại trang login, hiện thông báo lỗi *"Email hoặc mật khẩu không chính xác"*
 
-## Module 3: Vòng Đời Nhiệm Vụ (Task Lifecycle)
-
-### 3.1 Backend API Tests (`tests/Feature/Api/TaskApiTest.php`)
-
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-3.1 | Lấy danh sách template nhiệm vụ | GET `/v1/tasks/templates` | 200, 12 templates |
-| TC-3.2 | Tạo nhiệm vụ tùy chỉnh (photo) | POST `/v1/tasks` với `verification_mode: "photo"` | 201, trả về `task.id` |
-| TC-3.3 | Tạo nhiệm vụ tùy chỉnh (pin) | POST `/v1/tasks` với `verification_mode: "pin"` | 201 |
-| TC-3.4 | Tạo nhiệm vụ tùy chỉnh (auto) | POST `/v1/tasks` với `verification_mode: "auto"` | 201 |
-| TC-3.5 | Danh sách nhiệm vụ theo gia đình | GET `/v1/tasks` | 200, tasks thuộc `family_id` |
-| TC-3.6 | Xóa nhiệm vụ | DELETE `/v1/tasks/{id}` | 200, task bị xóa |
-| TC-3.7 | Lấy nhiệm vụ hôm nay cho bé | GET `/v1/children/{id}/tasks/today` | 200, mảng tasks kèm status |
-| TC-3.8 | Nộp bài nhiệm vụ (photo) | POST `/v1/task-logs` + `{task_id, child_id}` | 201, `status: "submitted"` |
-| TC-3.9 | Nộp bài nhiệm vụ (auto-approve) | POST `/v1/task-logs` với task `verification_mode: "auto"` | 201, `status: "approved"` |
-
-### 3.2 Web Dashboard Tests (`tests/Feature/Web/TaskWebTest.php`)
-
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-3.10 | Trang danh sách nhiệm vụ | GET `/tasks` khi đăng nhập | 200, render danh sách tasks |
-| TC-3.11 | Trang tạo nhiệm vụ mới | GET `/tasks/create` | 200, render form tạo task |
-| TC-3.12 | Tạo nhiệm vụ qua web form | POST `/tasks` với dữ liệu hợp lệ | 302 redirect `/tasks` |
-| TC-3.13 | Xóa nhiệm vụ qua web | DELETE `/tasks/{id}` | 302 redirect + task xóa |
-
-### 3.3 Mobile Widget Tests (`test/tasks/`)
-
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-3.14 | TaskListScreen hiển thị tiêu đề | Mount `TaskListScreen` | Hiện `"📋 Nhiệm vụ của con"` |
-| TC-3.15 | TaskListScreen phân loại theo Tab | Chuyển tab "Việc nhà", "Học tập" | Lọc đúng category |
-| TC-3.16 | TaskListScreen tải dữ liệu từ API | `_loadTasksFromBackend()` | Hiện tasks từ Backend, không mock |
-| TC-3.17 | TaskDetailScreen hiển thị chi tiết | Mount với `taskData` | Hiện title, stars, verification mode |
-| TC-3.18 | TaskTimerScreen đếm ngược 25:00 | Mount `TaskTimerScreen` | Hiện `"25:00"` và nút `"Bắt đầu học"` |
-| TC-3.19 | TaskTimerScreen đếm ngược khi bấm Start | Bấm "Bắt đầu học" rồi pump 1s | Hiện `"24:59"` |
+### TC-1.8 — Truy cập Dashboard khi chưa đăng nhập
+- **Bước 1:** Mở tab ẩn danh (Incognito), truy cập `http://localhost:8000/dashboard`
+- **Kỳ vọng:** Bị redirect về trang `/login`
 
 ---
 
-## Module 4: Duyệt Bài & Tặng Sao (Approval & Stars)
+## Luồng 2: Trang Chủ Trẻ Em & Thú Cưng
 
-### 4.1 Backend API Tests (`tests/Feature/Api/ApprovalApiTest.php`)
+### TC-2.1 — Trang chủ hiển thị đầy đủ thông tin
+- **Bước 1:** Đăng nhập Bé Nam trên Mobile App
+- **Kỳ vọng:** Thấy đủ các mục:
+  - Lời chào *"Xin chào, Nam! 👋"*
+  - Danh hiệu *"Hạng Bạc"*
+  - Streak *"12 ngày"* 🔥
+  - Sao *"45 Sao"* ⭐
+  - Thú cưng *"Mimi đang vui vẻ 😊"* + thanh kinh nghiệm
 
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-4.1 | Danh sách bài chờ duyệt | GET `/v1/task-logs/pending` | 200, mảng logs `status: "submitted"` |
-| TC-4.2 | Duyệt bài + cộng Sao | POST `/v1/task-logs/{id}/approve` kèm `{sticker}` | 200, `status: "approved"`, child `totalStars` tăng |
-| TC-4.3 | Từ chối bài | POST `/v1/task-logs/{id}/reject` | 200, `status: "rejected"`, Sao không đổi |
-| TC-4.4 | Duyệt bài không tồn tại | POST `/v1/task-logs/999/approve` | 404 |
+### TC-2.2 — Thú cưng có hoạt hình vật lý
+- **Bước 1:** Ở Trang chủ, quan sát con Mèo Mimi
+- **Kỳ vọng:** Mèo có hiệu ứng nảy nhẹ (lò xo), mắt nhìn theo con trỏ chuột / ngón tay
 
-### 4.2 Web Dashboard Tests (`tests/Feature/Web/PendingWebTest.php`)
+### TC-2.3 — Nhiệm vụ hôm nay hiển thị trên Trang chủ
+- **Bước 1:** Cuộn xuống phần *"Việc hôm nay của con"*
+- **Kỳ vọng:** Hiện 3 thẻ nhiệm vụ nhanh (VD: Dọn dẹp phòng, Đọc sách, Rửa chén đĩa) kèm số Sao thưởng
 
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-4.5 | Trang chờ duyệt hiển thị bài nộp | GET `/pending` | 200, render danh sách bài submitted |
-| TC-4.6 | Duyệt bài 1-chạm qua web | POST `/pending/{id}/approve` | 302 redirect, bài chuyển approved |
-| TC-4.7 | Từ chối bài qua web | POST `/pending/{id}/reject` | 302 redirect, bài chuyển rejected |
+### TC-2.4 — Lối tắt nhanh hoạt động
+- **Bước 1:** Cuộn xuống phần *"Lối tắt nhanh"*
+- **Bước 2:** Bấm vào **"Đổi quà"**
+- **Kỳ vọng:** Chuyển sang trang Cửa Hàng Đổi Quà
 
-### 4.3 Mobile Widget Tests (`test/parent/`)
-
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-4.8 | ParentApprovalScreen hiển thị tiêu đề | Mount `ParentApprovalScreen` | Hiện `"Phụ Huynh — Duyệt Bài 👨‍👩‍👧"` |
-| TC-4.9 | ParentApprovalScreen tải bài chờ duyệt từ API | `_loadPendingTasks()` | Hiện danh sách bài `submitted` từ Backend |
-
----
-
-## Module 5: Đổi Quà & Quản Lý Phần Thưởng (Rewards & Redemption)
-
-### 5.1 Backend API Tests (`tests/Feature/Api/RewardApiTest.php`)
-
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-5.1 | Tạo phần thưởng mới | POST `/v1/rewards` + `{title, stars_required}` | 201, trả về `reward.id` |
-| TC-5.2 | Danh sách phần thưởng gia đình | GET `/v1/rewards` | 200, mảng rewards thuộc `family_id` |
-| TC-5.3 | Đổi quà (đủ Sao) | POST `/v1/rewards/{id}/redeem` + `{child_id}` | 200, `remaining_stars` giảm |
-| TC-5.4 | Đổi quà (thiếu Sao) | Bé có 5 Sao, quà cần 50 | 422, `"Không đủ Sao"` |
-| TC-5.5 | Đổi quà không tồn tại | POST `/v1/rewards/999/redeem` | 404 |
-
-### 5.2 Web Dashboard Tests (`tests/Feature/Web/RewardWebTest.php`)
-
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-5.6 | Trang danh sách phần thưởng | GET `/rewards` | 200, render rewards |
-| TC-5.7 | Tạo phần thưởng qua web | POST `/rewards` với dữ liệu hợp lệ | 302 redirect |
-| TC-5.8 | Xóa phần thưởng qua web | DELETE `/rewards/{id}` | 302 redirect |
-
-### 5.3 Mobile Widget Tests (`test/rewards/`)
-
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-5.9 | RewardListScreen hiển thị tiêu đề | Mount `RewardListScreen` | Hiện `"Cửa Hàng Đổi Quà 🎁"` |
-| TC-5.10 | RewardListScreen tải danh sách quà từ API | `_loadRewards()` | Hiện rewards từ `/v1/rewards` |
+### TC-2.5 — Thanh điều hướng dưới cùng (Bottom Navigation)
+- **Bước 1:** Bấm tab **"Nhiệm vụ"** trên thanh dưới
+- **Kỳ vọng:** Chuyển sang tab Danh sách Nhiệm vụ
+- **Bước 2:** Bấm tab **"Đổi quà"**
+- **Kỳ vọng:** Chuyển sang tab Đổi Quà
+- **Bước 3:** Bấm tab **"Thống kê"**
+- **Kỳ vọng:** Chuyển sang tab Thống kê & Streak
+- **Bước 4:** Bấm tab **"Trang chủ"**
+- **Kỳ vọng:** Quay về Trang chủ
 
 ---
 
-## Module 6: Gamification — Bảng Xếp Hạng, Timer, Gallery, Settings
+## Luồng 3: Danh Sách Nhiệm Vụ & Phân Loại
 
-### 6.1 Mobile Widget Tests (`test/gamification/`)
+### TC-3.1 — Danh sách nhiệm vụ hiển thị đầy đủ
+- **Bước 1:** Vào tab **Nhiệm vụ** trên Mobile App
+- **Kỳ vọng:** Hiện tiêu đề *"📋 Nhiệm vụ của con"* và danh sách nhiệm vụ kèm emoji + số Sao
 
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-6.1 | FamilyLeaderboardScreen hiển thị bục vinh quang | Mount `FamilyLeaderboardScreen` | Hiện `"Bảng Xếp Hạng Thi Đua 🏆"`, 🥇🥈🥉 |
-| TC-6.2 | PraiseGalleryScreen hiển thị feed ảnh | Mount `PraiseGalleryScreen` | Hiện `"Góc Kỷ Niệm & Lời Khen 💖"`, ảnh + sticker |
-| TC-6.3 | NotificationCenterScreen hiển thị thông báo | Mount `NotificationCenterScreen` | Hiện `"Thông Báo 🔔"`, nội dung thông báo |
-| TC-6.4 | ProfileSettingsScreen hiển thị cài đặt | Mount `ProfileSettingsScreen` | Hiện toggle Sound FX, Thông báo |
-| TC-6.5 | StatsScreen hiển thị streak & biểu đồ | Mount `StatsScreen` | Hiện `"Báo Cáo & Streak 🔥"`, `"5 Ngày"` |
-| TC-6.6 | HomeScreen hiển thị thú cưng và thống kê | Mount `HomeScreen` | Hiện `"Xin chào, Nam!"`, `"Mimi đang vui vẻ"`, `"45 Sao"` |
+### TC-3.2 — Phân loại nhiệm vụ theo Tab
+- **Bước 1:** Bấm tab **"🏠 Việc nhà"**
+- **Kỳ vọng:** Chỉ hiện nhiệm vụ category `housework` (VD: Dọn phòng, Rửa bát, Quét nhà)
+- **Bước 2:** Bấm tab **"📚 Học tập"**
+- **Kỳ vọng:** Chỉ hiện nhiệm vụ category `study` (VD: Đọc sách 20 phút)
+- **Bước 3:** Bấm tab **"Tất cả"**
+- **Kỳ vọng:** Hiện lại tất cả nhiệm vụ
 
----
+### TC-3.3 — Trạng thái nhiệm vụ hiển thị đúng màu
+- **Bước 1:** Quan sát danh sách nhiệm vụ
+- **Kỳ vọng:**
+  - Nhiệm vụ `todo` → Nhãn **"Chưa làm"** (⚪ hoặc màu xám)
+  - Nhiệm vụ `submitted` → Nhãn **"Chờ duyệt"** (🟠 cam)
+  - Nhiệm vụ `approved` → Nhãn **"Đã duyệt"** (🟢 xanh lá)
 
-## Module 7: Tích Hợp Mobile ↔ Backend (Mobile Integration & Services)
+### TC-3.4 — Bấm vào nhiệm vụ mở chi tiết
+- **Bước 1:** Bấm vào thẻ nhiệm vụ *"Dọn phòng ngủ"*
+- **Kỳ vọng:** Mở trang chi tiết nhiệm vụ, hiện mô tả + số Sao + kiểu xác minh (Ảnh chụp / Mã PIN)
 
-### 7.1 Backend API Tests (`tests/Feature/Api/MobileIntegrationTest.php`)
-
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-7.1 | Đăng ký FCM token | POST `/v1/notifications/register` + `{token, device_type}` | 200 |
-| TC-7.2 | Đồng bộ danh sách app bị chặn | POST `/v1/blocking/apps` + `{apps: [...]}` | 200 |
-| TC-7.3 | Analytics tuần cho bé | GET `/v1/analytics/weekly/{childId}` | 200, dữ liệu biểu đồ tuần |
-
-### 7.2 Mobile Service Tests (`test/services/`)
-
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-7.4 | `AppBlockingService` xử lý plugin thiếu | Gọi `syncBlockedApps()` trong test env | Return `true` gracefully |
-| TC-7.5 | `OfflineSyncService` lưu queue offline | Ghi action khi không có mạng | Queue được lưu local |
-| TC-7.6 | `OfflineSyncService` đồng bộ khi có mạng | Khôi phục kết nối | Queue replay thành công |
+### TC-3.5 — Nộp bài nhiệm vụ
+- **Bước 1:** Ở trang chi tiết nhiệm vụ, bấm **"Chụp ảnh kết quả"** hoặc **"Nộp bài"**
+- **Kỳ vọng:** Hiện thông báo *"Đã nộp bài, chờ bố mẹ duyệt"*, trạng thái chuyển sang `submitted`
 
 ---
 
-## Module 8: Kiểm Thử Tích Hợp E2E Khép Kín (End-to-End Integration)
+## Luồng 4: Bố Mẹ Duyệt Bài (Web Dashboard + Mobile App)
 
-### 8.1 E2E Backend Full Lifecycle (`tests/Feature/Api/E2EFullLifecycleTest.php`)
+### TC-4.1 — Web Dashboard hiển thị thống kê tổng quan
+- **Bước 1:** Đăng nhập `http://localhost:8000` với tài khoản bố mẹ
+- **Kỳ vọng:** Dashboard hiện đủ 4 thẻ: Tổng số Trẻ em, Nhiệm vụ Chờ duyệt, Hoàn thành hôm nay, Sao thưởng
 
-| # | Test Case | Mô Tả | Expected |
-|---|-----------|--------|----------|
-| TC-8.1 | Quy trình đầy đủ: Đăng ký → Tạo bé → Giao bài → Nộp bài → Duyệt → Cộng Sao → Đổi quà | Chuỗi 10 API calls liên tục | Mỗi bước trả về đúng status và dữ liệu lan truyền |
-| TC-8.2 | Nhiều bé trong 1 gia đình | Tạo 2 bé, giao bài khác nhau, duyệt riêng | Sao và streak độc lập giữa 2 bé |
-| TC-8.3 | Duyệt bài trên Web → Mobile status update | Duyệt bài qua POST `/pending/{id}/approve` → GET `/v1/children/{id}/tasks/today` | Task status = `"approved"` |
-| TC-8.4 | Mua skin → Profile phản ánh | POST skin purchase → GET profile | `active_skin` thay đổi, `available_stars` giảm |
+### TC-4.2 — Web Dashboard: xem danh sách Trẻ em
+- **Bước 1:** Bấm menu **"Trẻ em"** ở sidebar trái
+- **Kỳ vọng:** Hiện danh sách **Bé Nam 😸** (50 Sao, Streak 7) và **Bé Linh 🐰** (38 Sao, Streak 5)
+
+### TC-4.3 — Web Dashboard: xem Nhiệm vụ
+- **Bước 1:** Bấm menu **"Nhiệm vụ"**
+- **Kỳ vọng:** Hiện danh sách nhiệm vụ với cột Tên, Sao thưởng, Category, Kiểu xác minh
+
+### TC-4.4 — Web Dashboard: mở trang Chờ duyệt
+- **Bước 1:** Bấm menu **"Chờ duyệt"**
+- **Kỳ vọng:** Hiện danh sách bài nộp đang ở trạng thái `submitted` (nếu có)
+
+### TC-4.5 — Web Dashboard: duyệt bài 1-chạm
+- **Điều kiện:** Có ít nhất 1 bài nộp chờ duyệt
+- **Bước 1:** Bấm menu **"Chờ duyệt"**
+- **Bước 2:** Bấm nút **"Duyệt ✅"** bên cạnh 1 bài nộp
+- **Kỳ vọng:** Bài biến mất khỏi danh sách chờ duyệt, Sao thưởng cộng cho bé
+
+### TC-4.6 — Web Dashboard: từ chối bài
+- **Điều kiện:** Có ít nhất 1 bài nộp chờ duyệt
+- **Bước 1:** Bấm nút **"Từ chối ❌"**
+- **Kỳ vọng:** Bài biến mất, Sao KHÔNG được cộng
+
+### TC-4.7 — Mobile App: Bố mẹ duyệt bài
+- **Bước 1:** Trên Mobile App, chọn vai trò **"Bố mẹ"**
+- **Bước 2:** Quan sát màn hình Duyệt bài Phụ huynh
+- **Kỳ vọng:** Hiện tiêu đề *"Phụ Huynh — Duyệt Bài 👨‍👩‍👧"* và danh sách bài chờ duyệt (nếu có)
+
+### TC-4.8 — Đồng bộ duyệt: Duyệt trên Web → Mobile cập nhật
+- **Bước 1:** Mở Web Dashboard, duyệt 1 bài tập
+- **Bước 2:** Quay lại Mobile App, vào tab **Nhiệm vụ**, kéo refresh hoặc F5
+- **Kỳ vọng:** Bài vừa duyệt hiện trạng thái **"Đã duyệt 🟢"** trên Mobile App
+
+---
+
+## Luồng 5: Đổi Quà & Phần Thưởng
+
+### TC-5.1 — Mobile App: xem danh sách Quà
+- **Bước 1:** Vào tab **"Đổi quà"** trên thanh điều hướng dưới
+- **Kỳ vọng:** Hiện tiêu đề *"Cửa Hàng Đổi Quà 🎁"* + số Sao hiện tại + danh sách quà kèm giá Sao
+
+### TC-5.2 — Mobile App: đổi quà (đủ Sao)
+- **Điều kiện:** Bé có đủ Sao để đổi quà
+- **Bước 1:** Bấm nút **"30 ⭐"** (hoặc giá Sao) bên cạnh 1 phần thưởng
+- **Bước 2:** Xác nhận đổi quà trong popup
+- **Kỳ vọng:** Hiện thông báo *"Đã gửi yêu cầu đổi... thành công! 🎉"*, số Sao giảm
+
+### TC-5.3 — Mobile App: đổi quà (thiếu Sao)
+- **Điều kiện:** Bé có ít Sao hơn giá quà
+- **Bước 1:** Quan sát nút bấm bên cạnh quà đắt tiền
+- **Kỳ vọng:** Nút bị xám / disabled, không bấm được
+
+### TC-5.4 — Web Dashboard: xem danh sách Phần thưởng
+- **Bước 1:** Bấm menu **"Phần thưởng"** trên Web Dashboard
+- **Kỳ vọng:** Hiện danh sách phần thưởng với Tên, Mô tả, Số Sao yêu cầu
+
+### TC-5.5 — Web Dashboard: tạo phần thưởng mới
+- **Bước 1:** Bấm **"Tạo phần thưởng mới"**
+- **Bước 2:** Nhập Tên: "Đi công viên nước", Sao: 200
+- **Bước 3:** Bấm **Lưu**
+- **Kỳ vọng:** Quà mới xuất hiện trong danh sách
+
+---
+
+## Luồng 6: Thú Cưng — Tương Tác & Cửa Hàng Skin
+
+### TC-6.1 — Trang thú cưng hiển thị đầy đủ
+- **Bước 1:** Trên Mobile App, vào trang **Thú cưng** (từ Lối tắt "Chăm bé" hoặc route `/pet`)
+- **Kỳ vọng:** Hiện Mèo Mimi kèm:
+  - Trạng thái *"Mimi đang vui vẻ 😊"*
+  - Thanh **Độ no nê** (VD: 60%)
+  - Số Sao hiện tại
+  - Nút **"Cho ăn"** và **"Chọc nhột"**
+
+### TC-6.2 — Cho thú cưng ăn
+- **Bước 1:** Bấm nút **"Cho ăn (-2 ⭐)"**
+- **Kỳ vọng:**
+  - Sao giảm 2 (VD: 45 → 43)
+  - Thanh Độ no tăng (VD: 60% → 75%)
+  - Phản hồi: *"Mimi ăn ngon miệng lắm! 🍖"*
+
+### TC-6.3 — Chọc nhột thú cưng
+- **Bước 1:** Bấm nút **"Chọc nhột"**
+- **Kỳ vọng:** Phản hồi *"Hahaha, nhột quá chủ nhân ơi! 😂"*
+
+### TC-6.4 — Cửa hàng Skin hiển thị đúng
+- **Bước 1:** Vào route `/store` (từ Lối tắt "Tủ đồ")
+- **Kỳ vọng:** Hiện tiêu đề *"🛍️ Cửa hàng & Tủ đồ"* + danh sách skin (Mèo Robot 🤖 - 15 Sao, Mèo Ninja 🥷 - 30 Sao)
+
+### TC-6.5 — Mua skin thú cưng
+- **Bước 1:** Bấm vào nút mua **Mèo Robot 🤖** (15 Sao)
+- **Kỳ vọng:** Sao giảm 15, skin được mở khóa, hiện trạng thái "Đã mở khóa"
+
+### TC-6.6 — Chọn loài thú cưng
+- **Bước 1:** Vào route `/pet/select`
+- **Kỳ vọng:** Hiện 4 loài: Mèo Mimi 🐱, Chó Rex 🐶, Rồng Spark 🐉, Thỏ Miffy 🐰
+
+---
+
+## Luồng 7: Gamification — Streak, Bảng Xếp Hạng, Timer, Gallery
+
+### TC-7.1 — Trang Thống kê & Streak
+- **Bước 1:** Vào tab **"Thống kê"** trên thanh điều hướng dưới
+- **Kỳ vọng:** Hiện:
+  - Tiêu đề *"Báo Cáo & Streak 🔥"*
+  - Chuỗi Streak *"5 Ngày"*
+  - Biểu đồ nhiệm vụ hoàn thành theo tuần
+
+### TC-7.2 — Bảng Xếp Hạng Gia Đình
+- **Bước 1:** Vào route `/family/leaderboard`
+- **Kỳ vọng:** Hiện:
+  - Tiêu đề *"Bảng Xếp Hạng Thi Đua 🏆"*
+  - Bục vinh quang 🥇 🥈 🥉 xếp hạng các bé theo số Sao
+
+### TC-7.3 — Đồng Hồ Pomodoro hiển thị đúng
+- **Bước 1:** Vào route `/tasks/timer`
+- **Kỳ vọng:** Hiện:
+  - Tiêu đề *"Đồng Hồ Tập Trung ⏳"*
+  - Đồng hồ hiện **25:00**
+  - Nút **"Bắt đầu học"**
+
+### TC-7.4 — Đồng Hồ Pomodoro đếm ngược
+- **Bước 1:** Bấm nút **"Bắt đầu học"**
+- **Bước 2:** Chờ 2-3 giây
+- **Kỳ vọng:** Đồng hồ đếm ngược (VD: 24:58, 24:57...), nút đổi thành **"Tạm dừng"**
+
+### TC-7.5 — Góc Kỷ Niệm & Lời Khen
+- **Bước 1:** Vào route `/praise-gallery`
+- **Kỳ vọng:** Hiện:
+  - Tiêu đề *"Góc Kỷ Niệm & Lời Khen 💖"*
+  - Feed ảnh bài nộp kèm sticker khen ngợi (VD: *"Xuất sắc!"*)
+
+### TC-7.6 — Trung tâm Thông Báo
+- **Bước 1:** Vào route `/notifications`
+- **Kỳ vọng:** Hiện:
+  - Tiêu đề *"Thông Báo 🔔"*
+  - Danh sách thông báo (VD: *"🎉 Bài tập đã được duyệt!"*)
+
+### TC-7.7 — Web Dashboard: Báo cáo & Biểu đồ
+- **Bước 1:** Trên Web Dashboard, bấm menu **"Báo cáo"**
+- **Kỳ vọng:** Hiện biểu đồ Chart.js nhiệm vụ hoàn thành 7 ngày qua
+
+---
+
+## Luồng 8: Cài Đặt & Responsive
+
+### TC-8.1 — Trang Cài đặt hiển thị đầy đủ
+- **Bước 1:** Vào route `/profile/settings`
+- **Kỳ vọng:** Hiện:
+  - Tiêu đề *"Cài Đặt & Hồ Sơ ⚙️"*
+  - Tên bé *"Bé Nam 👦"*
+  - Toggle **"Âm thanh hiệu ứng (Sound FX)"**
+  - Toggle **"Thông báo"**
+
+### TC-8.2 — Bật/Tắt Sound FX
+- **Bước 1:** Bấm toggle **"Âm thanh hiệu ứng (Sound FX)"**
+- **Kỳ vọng:** Toggle chuyển trạng thái ON ↔ OFF
+
+### TC-8.3 — Khung iPhone trên Web
+- **Bước 1:** Mở `http://localhost:8080` trên trình duyệt Desktop (màn hình rộng > 600px)
+- **Kỳ vọng:** App hiển thị bên trong khung viền iPhone 15 Pro với Dynamic Island ở trên, nền xám bên ngoài
+
+### TC-8.4 — Responsive: Mobile nhỏ không có khung
+- **Bước 1:** Thu nhỏ cửa sổ trình duyệt xuống < 600px (hoặc dùng DevTools chọn iPhone)
+- **Kỳ vọng:** App hiển thị toàn màn hình, KHÔNG có khung iPhone bao quanh
 
 ---
 
 ## Tổng Kết
 
-| Tầng | Số Test Case | Framework |
-|------|-------------|-----------|
-| Backend API (PHPUnit Feature) | 32 | `php artisan test` |
-| Web Dashboard (PHPUnit Feature) | 14 | `php artisan test` |
-| Domain Logic (PHPUnit Unit) | 9 | `php artisan test` |
-| Mobile Widget (Flutter) | 19 | `flutter test` |
-| Mobile Integration E2E | 4 | `flutter test` / manual |
-| **TỔNG CỘNG** | **78 Test Cases** | |
-
----
-
-## Lệnh Chạy Kiểm Thử
-
-```bash
-# Backend (tất cả PHP tests)
-docker compose exec -T app php artisan test
-
-# Mobile (tất cả Flutter widget tests)
-cd mobile && flutter test
-
-# Web production build verification
-cd backend && npm run build
-```
+| Luồng | Số Test Case | Nơi Test |
+|-------|-------------|----------|
+| 1. Đăng Nhập & Chọn Vai Trò | 8 | Mobile App + Web |
+| 2. Trang Chủ & Thú Cưng | 5 | Mobile App |
+| 3. Danh Sách Nhiệm Vụ | 5 | Mobile App |
+| 4. Duyệt Bài (Web + Mobile) | 8 | Web + Mobile |
+| 5. Đổi Quà & Phần Thưởng | 5 | Mobile App + Web |
+| 6. Thú Cưng & Cửa Hàng Skin | 6 | Mobile App |
+| 7. Gamification | 7 | Mobile App + Web |
+| 8. Cài Đặt & Responsive | 4 | Mobile App + Web |
+| **TỔNG CỘNG** | **48 Test Cases** | |
