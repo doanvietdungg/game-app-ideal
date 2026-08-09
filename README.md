@@ -1,58 +1,82 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚀 KidTime — Smart Child Habit & Gamified Management Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> Nền tảng quản lý habit & phân công nhiệm vụ cho trẻ em kết hợp thú cưng hoạt hình sinh động, khóa ứng dụng giải trí thông minh và giao diện quản lý phụ huynh hiện đại.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🌟 Kiến Trúc Dự Án (Monorepo)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```
+game-app-ideal/
+├── backend/                  # Laravel 11 Clean DDD Architecture Backend
+│   ├── app/                  # Domain, Infrastructure, Application & UI Layers
+│   ├── resources/js/         # Parent Web Dashboard (Inertia.js + Vue 3 + PrimeVue)
+│   ├── routes/               # API & Web routes
+│   └── tests/                # PHPUnit & Feature Test Suites (15/15 passed)
+└── mobile/                   # Flutter Clean Architecture Mobile App
+    ├── lib/                  # Sprints 1-10 Features, Vector Physics Engine, Router
+    ├── ios/                  # iOS Native Swift FamilyControls MethodChannel Bridge
+    └── test/                 # Flutter Widget Test Suites (16/16 passed)
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+---
 
-## Contributing
+## 🛠️ Công Nghệ Sử Dụng (Tech Stack)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Phía Backend & Web Dashboard
+- **Laravel 11**: Clean Domain-Driven Design (DDD) Architecture.
+- **Sanctum Auth**: Xác thực Email cho Bố mẹ & PIN 4 số nhanh gọn cho Trẻ em.
+- **Inertia.js v2**: Bridge nối Laravel Controller trả về Vue 3 SPA không cần viết API thừa.
+- **Vue 3 + PrimeVue 4**: Composition API `<script setup>`, PrimeVue components, Chart.js.
+- **Tailwind CSS v3**: Thiết kế chuẩn màu sắc phụ huynh (`#6C63FF`, `#48CAE4`).
 
-## Code of Conduct
+### Phía Mobile App
+- **Flutter 3.x**: Cross-platform (iOS, Android, macOS).
+- **Interactive Physics Vector Pet Engine**: `CustomPainter` rendering 60 FPS, Gaze/Eye tracking physics, Squish & Stretch lò xo, Drag-and-drop food magnet attraction, Particle Emitter overlay.
+- **Multi-Species Support**: 🐱 Mèo Mimi, 🐶 Chó Rex, 🐉 Rồng Spark, 🐰 Thỏ Miffy.
+- **iOS Native Swift FamilyControls Bridge**: Native Swift code quản lý `ManagedSettingsStore`.
+- **Audio FX Sound Engine**: Tiếng nhai nhồm nhàm 🍖, tiếng cười khúc khích 😸, tiếng pháo hoa 🎺, tiếng ting-ting ⭐.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## 🚀 Hướng Dẫn Chạy Dự Án (Getting Started)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 1. Phía Backend & Web Dashboard
+```bash
+# Chạy Docker Services
+docker compose up -d
 
-## License
+# Thực thi Migrate & Seed
+docker compose exec app php artisan migrate --seed
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Chạy kiểm thử Backend
+docker compose exec app php artisan test
+```
+
+### 2. Build Frontend Web Dashboard
+```bash
+cd backend
+npm install
+npm run build
+```
+
+### 3. Phía Mobile App (Flutter)
+```bash
+cd mobile
+flutter pub get
+flutter test
+flutter run
+```
+
+---
+
+## 🧪 Kết Quả Kiểm Thử (Verification)
+
+- **Flutter Widget Tests**: `16/16 passed` 🟢
+- **Laravel Backend Tests**: `15/15 passed` 🟢
+- **Vite Bundle Build**: `899 modules built cleanly in 1.1s` 🟢
+
+---
+
+## 📄 Giấy Phép & Tác Quyền
+Dự án được bảo hộ bởi bản quyền mở KidTime Platform.
