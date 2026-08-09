@@ -14,6 +14,7 @@ import 'package:mobile/features/notifications/presentation/notification_center_s
 import 'package:mobile/features/gallery/presentation/praise_gallery_screen.dart';
 import 'package:mobile/features/pet/presentation/pet_selection_screen.dart';
 import 'package:mobile/features/leaderboard/presentation/family_leaderboard_screen.dart';
+import 'package:mobile/features/profile/presentation/profile_settings_screen.dart';
 import 'package:mobile/core/services/app_blocking_service.dart';
 
 void main() {
@@ -228,6 +229,18 @@ void main() {
     expect(find.text('Bảng Xếp Hạng Thi Đua 🏆'), findsOneWidget);
     expect(find.text('🥇'), findsOneWidget);
     expect(find.text('🥈'), findsOneWidget);
+  });
+
+  testWidgets('ProfileSettingsScreen mounts and displays settings options', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: ProfileSettingsScreen(),
+    ));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Cài Đặt & Hồ Sơ ⚙️'), findsOneWidget);
+    expect(find.text('Bé Nam 👦'), findsOneWidget);
+    expect(find.text('Âm thanh hiệu ứng (Sound FX)'), findsOneWidget);
   });
 
   test('AppBlockingService handles missing plugin gracefully in test env', () async {
