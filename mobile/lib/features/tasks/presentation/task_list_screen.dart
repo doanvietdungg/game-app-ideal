@@ -11,6 +11,8 @@ class TaskListScreen extends StatefulWidget {
 
 class _TaskListScreenState extends State<TaskListScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  List<Map<String, dynamic>> _tasks = [];
+  bool _isLoading = false;
 
   final List<Map<String, String>> _categories = [
     {'key': 'all', 'label': 'Tất cả'},
@@ -21,43 +23,34 @@ class _TaskListScreenState extends State<TaskListScreen> with SingleTickerProvid
     {'key': 'sleep', 'label': '😴 Giấc ngủ'},
   ];
 
-  // Mocked data for layout rendering (Sprint 2)
+  // Mocked data for layout rendering fallback
   final List<Map<String, dynamic>> _mockTasks = [
     {
       'id': 1,
-      'title': 'Dọn dẹp phòng ngủ',
+      'title': 'Dọn dẹp phòng ngủ 🏠',
       'stars': 5,
       'category': 'housework',
-      'status': 'todo',
+      'status': 'submitted',
       'emoji': '🏠',
-      'desc': 'Hãy dọn đồ chơi gọn gàng vào hộp và gấp chăn màn lại con nhé!'
+      'desc': 'Hãy xếp gọn đồ chơi và gấp chăn màn ngăn nắp con nhé!'
     },
     {
       'id': 2,
-      'title': 'Đọc sách 20 phút',
+      'title': 'Đọc sách 20 phút 📚',
       'stars': 10,
       'category': 'study',
-      'status': 'submitted',
+      'status': 'todo',
       'emoji': '📚',
-      'desc': 'Chọn 1 cuốn truyện/sách con thích và đọc say sưa trong 20 phút.'
+      'desc': 'Đọc tập trung 20 phút sách truyện con yêu thích.'
     },
     {
       'id': 3,
-      'title': 'Nhảy dây 50 cái',
-      'stars': 8,
+      'title': 'Tập thể dục buổi sáng 🏃',
+      'stars': 5,
       'category': 'exercise',
       'status': 'approved',
       'emoji': '🏃',
-      'desc': 'Vận động thể thao khỏe mạnh nâng cao đề kháng.'
-    },
-    {
-      'id': 4,
-      'title': 'Ăn hết rau xanh',
-      'stars': 6,
-      'category': 'eating',
-      'status': 'todo',
-      'emoji': '🥦',
-      'desc': 'Ăn thật nhiều rau xanh để cơ thể có đủ vitamin nhé!'
+      'desc': 'Chạy nhảy và tập các động tác vươn thở buổi sáng.'
     },
   ];
 
@@ -65,6 +58,7 @@ class _TaskListScreenState extends State<TaskListScreen> with SingleTickerProvid
   void initState() {
     super.initState();
     _tabController = TabController(length: _categories.length, vsync: this);
+    _tasks = List.from(_mockTasks);
   }
 
   @override
@@ -74,8 +68,8 @@ class _TaskListScreenState extends State<TaskListScreen> with SingleTickerProvid
   }
 
   List<Map<String, dynamic>> _getFilteredTasks(String categoryKey) {
-    if (categoryKey == 'all') return _mockTasks;
-    return _mockTasks.where((t) => t['category'] == categoryKey).toList();
+    if (categoryKey == 'all') return _tasks;
+    return _tasks.where((t) => t['category'] == categoryKey).toList();
   }
 
   @override
