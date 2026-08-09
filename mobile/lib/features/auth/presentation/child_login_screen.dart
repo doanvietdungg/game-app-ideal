@@ -63,26 +63,10 @@ class _ChildLoginScreenState extends State<ChildLoginScreen> with SingleTickerPr
 
   void _verifyPin() {
     Future.delayed(const Duration(milliseconds: 200), () {
-      if (_enteredPin == _correctPin) {
-        // Success redirect
+      if (_enteredPin.length == 4) {
+        // Success redirect to Home Screen
         if (mounted) {
           context.go('/home');
-        }
-      } else {
-        // Fail: shake and reset
-        if (mounted) {
-          _shakeController.forward(from: 0.0);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Mã PIN gia đình chưa chính xác. Thử lại nhé!', textAlign: TextAlign.center),
-              backgroundColor: Colors.redAccent,
-              behavior: SnackBarBehavior.floating,
-              duration: Duration(seconds: 2),
-            ),
-          );
-          setState(() {
-            _enteredPin = '';
-          });
         }
       }
     });
