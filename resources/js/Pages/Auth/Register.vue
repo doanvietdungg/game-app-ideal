@@ -6,7 +6,9 @@ import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Button from 'primevue/button'
 
-defineOptions({ layout: AuthLayout })
+defineOptions({
+  layout: (h, page) => h(AuthLayout, { maxWidth: 'lg' }, () => page),
+})
 
 const form = useForm({
   name: '',
@@ -26,7 +28,7 @@ const submit = () => {
   <div>
     <h2 class="text-xl font-extrabold text-gray-800 mb-6">Đăng ký Tài khoản Gia đình</h2>
     <form @submit.prevent="submit" class="space-y-4">
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField label="Họ và tên" :error="form.errors.name" required>
           <InputText v-model="form.name" placeholder="Nguyễn Văn A" class="w-full" :invalid="!!form.errors.name" />
         </FormField>
@@ -35,18 +37,18 @@ const submit = () => {
         </FormField>
       </div>
 
-      <div class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField label="Mật khẩu" :error="form.errors.password" required>
-          <Password v-model="form.password" class="w-full" :invalid="!!form.errors.password" toggleMask />
+          <Password v-model="form.password" placeholder="••••••••" class="w-full" :invalid="!!form.errors.password" toggleMask fluid />
         </FormField>
-        <FormField label="Xác nhận mật khẩu" :error="form.errors.password_confirmation">
-          <Password v-model="form.password_confirmation" class="w-full" :feedback="false" toggleMask />
+        <FormField label="Xác nhận mật khẩu" :error="form.errors.password_confirmation" required>
+          <Password v-model="form.password_confirmation" placeholder="••••••••" class="w-full" :invalid="!!form.errors.password_confirmation" :feedback="false" toggleMask fluid />
         </FormField>
       </div>
 
       <div class="border-t border-gray-100 pt-4 mt-2">
         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Thông tin Gia đình</p>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField label="Tên gia đình" :error="form.errors.family_name" required>
             <InputText v-model="form.family_name" placeholder="Gia đình Nguyễn" class="w-full" :invalid="!!form.errors.family_name" />
           </FormField>
@@ -65,3 +67,4 @@ const submit = () => {
     </p>
   </div>
 </template>
+

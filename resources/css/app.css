@@ -6,3 +6,23 @@ body {
     font-family: 'Nunito', sans-serif;
     background-color: #F8F9FF;
 }
+
+/* Fix PrimeVue Password component width in flex/grid layouts */
+.p-password {
+    display: flex !important;
+    width: 100% !important;
+}
+
+.p-password input {
+    flex: 1 1 auto;
+    width: 100% !important;
+}
+
+/* Hide license badge */
+body > div[style*="fixed"][style*="bottom: 10px"],
+body > div[style*="fixed"][style*="bottom: 16px"],
+body > div[style*="position: fixed"][style*="z-index"] {
+    display: none !important;
+}
+
+
