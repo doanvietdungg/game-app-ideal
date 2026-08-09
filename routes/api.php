@@ -8,6 +8,7 @@ use KidTime\Presentation\Api\V1\PinController;
 use KidTime\Presentation\Api\V1\RewardController;
 use KidTime\Presentation\Api\V1\TaskController;
 use KidTime\Presentation\Api\V1\TaskLogController;
+use KidTime\Presentation\Api\V1\MobileProfileController;
 
 Route::prefix('v1')->group(function () {
     // Auth public routes
@@ -44,5 +45,12 @@ Route::prefix('v1')->group(function () {
 
         // Analytics routes
         Route::get('analytics/weekly/{childId}', [AnalyticsController::class, 'weekly']);
+
+        // Mobile profile & custom support endpoints
+        Route::get('children/{id}/profile', [MobileProfileController::class, 'profile']);
+        Route::get('children/{id}/tasks/today', [MobileProfileController::class, 'todayTasks']);
+        Route::post('children/{id}/pet/skin', [MobileProfileController::class, 'changeOrUnlockSkin']);
+        Route::post('notifications/register', [MobileProfileController::class, 'registerFcmToken']);
+        Route::post('blocking/apps', [MobileProfileController::class, 'syncApps']);
     });
 });
