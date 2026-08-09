@@ -333,39 +333,42 @@ class HomeScreen extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildActionItem(Icons.card_giftcard_rounded, 'Đổi quà', AppTheme.primary),
-            _buildActionItem(Icons.style_rounded, 'Tủ đồ', AppTheme.accent),
-            _buildActionItem(Icons.bookmark_rounded, 'Nhật ký', AppTheme.secondary),
-            _buildActionItem(Icons.pie_chart_rounded, 'Thống kê', const Color(0xFF87CEEB)),
+            _buildActionItem(Icons.card_giftcard_rounded, 'Đổi quà', AppTheme.primary, () => context.push('/store')),
+            _buildActionItem(Icons.style_rounded, 'Tủ đồ', AppTheme.accent, () => context.push('/store')),
+            _buildActionItem(Icons.bookmark_rounded, 'Nhật ký', AppTheme.secondary, () {}),
+            _buildActionItem(Icons.pie_chart_rounded, 'Thống kê', const Color(0xFF87CEEB), () {}),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildActionItem(IconData icon, String label, Color color) {
-    return Column(
-      children: [
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: color.withOpacity(0.3), width: 1.5),
+  Widget _buildActionItem(IconData icon, String label, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: color.withOpacity(0.3), width: 1.5),
+            ),
+            child: Icon(icon, color: color == AppTheme.accent ? const Color(0xFFFF8DA1) : color, size: 28),
           ),
-          child: Icon(icon, color: color == AppTheme.accent ? const Color(0xFFFF8DA1) : color, size: 28),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(
-            color: AppTheme.text,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              color: AppTheme.text,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
