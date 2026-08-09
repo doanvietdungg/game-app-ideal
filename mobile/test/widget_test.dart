@@ -15,6 +15,7 @@ import 'package:mobile/features/gallery/presentation/praise_gallery_screen.dart'
 import 'package:mobile/features/pet/presentation/pet_selection_screen.dart';
 import 'package:mobile/features/leaderboard/presentation/family_leaderboard_screen.dart';
 import 'package:mobile/features/profile/presentation/profile_settings_screen.dart';
+import 'package:mobile/features/tasks/presentation/task_timer_screen.dart';
 import 'package:mobile/core/services/app_blocking_service.dart';
 
 void main() {
@@ -241,6 +242,18 @@ void main() {
     expect(find.text('Cài Đặt & Hồ Sơ ⚙️'), findsOneWidget);
     expect(find.text('Bé Nam 👦'), findsOneWidget);
     expect(find.text('Âm thanh hiệu ứng (Sound FX)'), findsOneWidget);
+  });
+
+  testWidgets('TaskTimerScreen mounts and displays pomodoro countdown', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: TaskTimerScreen(),
+    ));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Đồng Hồ Tập Trung ⏳'), findsOneWidget);
+    expect(find.text('25:00'), findsOneWidget);
+    expect(find.text('Bắt đầu học'), findsOneWidget);
   });
 
   test('AppBlockingService handles missing plugin gracefully in test env', () async {
