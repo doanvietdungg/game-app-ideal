@@ -5,6 +5,7 @@ import 'package:mobile/features/home/presentation/home_screen.dart';
 import 'package:mobile/features/tasks/presentation/task_list_screen.dart';
 import 'package:mobile/features/tasks/presentation/task_detail_screen.dart';
 import 'package:mobile/features/pet/presentation/pet_screen.dart';
+import 'package:mobile/features/pet/presentation/widgets/draggable_food.dart';
 import 'package:mobile/features/pet/presentation/store_screen.dart';
 import 'package:mobile/features/rewards/presentation/reward_list_screen.dart';
 import 'package:mobile/features/stats/presentation/stats_screen.dart';
@@ -27,6 +28,8 @@ void main() {
     await tester.pumpWidget(const MaterialApp(
       home: HomeScreen(),
     ));
+
+    await tester.pump(const Duration(milliseconds: 100));
 
     // Verify child welcome message
     expect(find.text('Xin chào, Nam! 👋'), findsOneWidget);
@@ -91,6 +94,7 @@ void main() {
     expect(find.text('60%'), findsOneWidget);
 
     // Tap cho ăn (feeding costs 2 stars)
+    await tester.ensureVisible(find.text('Cho ăn (-2 ⭐)'));
     await tester.tap(find.text('Cho ăn (-2 ⭐)'));
     await tester.pump();
 
@@ -100,6 +104,7 @@ void main() {
     expect(find.text('Mimi ăn ngon miệng lắm! 🍖'), findsOneWidget);
 
     // Tap chọc nhột (tickle)
+    await tester.ensureVisible(find.text('Chọc nhột'));
     await tester.tap(find.text('Chọc nhột'));
     await tester.pump();
 
@@ -107,8 +112,9 @@ void main() {
     expect(find.text('Hahaha, nhột quá chủ nhân ơi! 😂'), findsOneWidget);
 
     // Settle all delayed expressions timers
-    await tester.pumpAndSettle(const Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 2));
   });
+
 
   testWidgets('StoreScreen mounts and supports unlocking premium skins', (WidgetTester tester) async {
     // Build the StoreScreen

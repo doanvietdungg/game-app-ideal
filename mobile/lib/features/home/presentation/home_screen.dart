@@ -1,29 +1,90 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../tasks/presentation/task_list_screen.dart';
+import '../../rewards/presentation/reward_list_screen.dart';
+import '../../stats/presentation/stats_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _currentIndex = 0;
+
+  final List<Widget> _tabs = [
+    const _HomeTabContent(),
+    const TaskListScreen(),
+    const RewardListScreen(),
+    const StatsScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 24),
-              _buildPetCanvas(context),
-              const SizedBox(height: 28),
-              _buildTodayTasksSection(context),
-              const SizedBox(height: 28),
-              _buildQuickActions(context),
-            ],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _tabs,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.deepOrange,
+        unselectedItemColor: Colors.grey.shade500,
+        showUnselectedLabels: true,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+        unselectedLabelStyle: const TextStyle(fontSize: 12),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_rounded),
+            label: 'Trang chủ',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.assignment_rounded),
+            label: 'Nhiệm vụ',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.card_giftcard_rounded),
+            label: 'Đổi quà',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart_rounded),
+            label: 'Thống kê',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HomeTabContent extends StatelessWidget {
+  const _HomeTabContent();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildHeader(),
+            const SizedBox(height: 24),
+            _buildPetCanvas(context),
+            const SizedBox(height: 28),
+            _buildTodayTasksSection(context),
+            const SizedBox(height: 28),
+            _buildQuickActions(context),
+          ],
         ),
       ),
     );
@@ -41,7 +102,7 @@ class HomeScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary.withOpacity(0.15),
+                    color: AppTheme.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Row(
@@ -74,10 +135,8 @@ class HomeScreen extends StatelessWidget {
         ),
         Row(
           children: [
-            // Streak
             _buildStatItem('🔥', '12 ngày'),
             const SizedBox(width: 12),
-            // Stars
             _buildStatItem('⭐', '45 Sao'),
           ],
         )
@@ -93,7 +152,7 @@ class HomeScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -121,99 +180,96 @@ class HomeScreen extends StatelessWidget {
     return GestureDetector(
       onTap: () => context.push('/pet'),
       child: Container(
-      height: 220,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 15,
-            offset: const Offset(0, 6),
-          ),
-        ],
-        border: Border.all(color: AppTheme.primary.withOpacity(0.2), width: 2),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Background soft circles
-          Positioned(
-            child: Container(
-              width: 160,
-              height: 160,
-              decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.08),
-                shape: BoxShape.circle,
+        height: 220,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(32),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 15,
+              offset: const Offset(0, 6),
+            ),
+          ],
+          border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2), width: 2),
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(
+              child: Container(
+                width: 160,
+                height: 160,
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
-          ),
-          // Virtual Pet emoji placeholder (Sprint 1)
-          const Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                '🐱', // Custom pet emoji representation
-                style: TextStyle(fontSize: 80),
-              ),
-              SizedBox(height: 12),
-              Text(
-                'Mimi đang vui vẻ 😊',
-                style: TextStyle(
-                  color: AppTheme.text,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-          // Progress bar to evolution
-          Positioned(
-            bottom: 16,
-            left: 24,
-            right: 24,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Cấp 1: Baby',
-                      style: TextStyle(
-                        color: AppTheme.textLight,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      '45/100 ⭐',
-                      style: TextStyle(
-                        color: AppTheme.textLight,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                Text(
+                  '🐱',
+                  style: TextStyle(fontSize: 80),
                 ),
-                const SizedBox(height: 6),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: const LinearProgressIndicator(
-                    value: 0.45,
-                    minHeight: 10,
-                    backgroundColor: Color(0xFFF1EDE5),
-                    valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
+                SizedBox(height: 12),
+                Text(
+                  'Mimi đang vui vẻ 😊',
+                  style: TextStyle(
+                    color: AppTheme.text,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+            Positioned(
+              bottom: 16,
+              left: 24,
+              right: 24,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Cấp 1: Baby',
+                        style: TextStyle(
+                          color: AppTheme.textLight,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '45/100 ⭐',
+                        style: TextStyle(
+                          color: AppTheme.textLight,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: const LinearProgressIndicator(
+                      value: 0.45,
+                      minHeight: 10,
+                      backgroundColor: Color(0xFFF1EDE5),
+                      valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildTodayTasksSection(BuildContext context) {
     final List<Map<String, dynamic>> mockTasks = [
@@ -270,7 +326,7 @@ class HomeScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -279,43 +335,43 @@ class HomeScreen extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: task['color'].withOpacity(0.15),
-              shape: BoxShape.circle,
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: (task['color'] as Color).withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(task['emoji'], style: const TextStyle(fontSize: 18)),
+              ),
             ),
-            child: Center(
-              child: Text(task['emoji'], style: const TextStyle(fontSize: 18)),
+            const Spacer(),
+            Text(
+              task['title'],
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: AppTheme.text,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          const Spacer(),
-          Text(
-            task['title'],
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: AppTheme.text,
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
+            const SizedBox(height: 4),
+            Text(
+              '+${task['stars']} Sao',
+              style: TextStyle(
+                color: task['color'],
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '+${task['stars']} Sao',
-            style: TextStyle(
-              color: task['color'],
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildQuickActions(BuildContext context) {
     return Column(
@@ -333,10 +389,10 @@ class HomeScreen extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildActionItem(Icons.card_giftcard_rounded, 'Đổi quà', AppTheme.primary, () => context.push('/store')),
+            _buildActionItem(Icons.card_giftcard_rounded, 'Đổi quà', AppTheme.primary, () => context.push('/rewards')),
             _buildActionItem(Icons.style_rounded, 'Tủ đồ', AppTheme.accent, () => context.push('/store')),
-            _buildActionItem(Icons.bookmark_rounded, 'Nhật ký', AppTheme.secondary, () {}),
-            _buildActionItem(Icons.pie_chart_rounded, 'Thống kê', const Color(0xFF87CEEB), () {}),
+            _buildActionItem(Icons.pets_rounded, 'Chăm bé', AppTheme.secondary, () => context.push('/pet')),
+            _buildActionItem(Icons.pie_chart_rounded, 'Thống kê', const Color(0xFF87CEEB), () => context.push('/stats')),
           ],
         ),
       ],
@@ -352,9 +408,9 @@ class HomeScreen extends StatelessWidget {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: color.withOpacity(0.3), width: 1.5),
+              border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
             ),
             child: Icon(icon, color: color == AppTheme.accent ? const Color(0xFFFF8DA1) : color, size: 28),
           ),

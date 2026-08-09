@@ -254,16 +254,10 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
                     DraggableFoodItem(
                       emoji: '🍖',
                       label: 'Cho ăn (-2 ⭐)',
+                      onTap: _feedPet,
                       onDragUpdate: _checkMagnetAttraction,
                       onDragEnd: (pos) {
-                        if (_isMouthOpen) {
-                          _feedPet();
-                        } else {
-                          setState(() {
-                            _touchOffset = null;
-                            _isMouthOpen = false;
-                          });
-                        }
+                        _feedPet();
                       },
                     ),
                     ElevatedButton.icon(
