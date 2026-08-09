@@ -7,6 +7,7 @@ import '../../features/auth/presentation/child_login_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/tasks/presentation/task_list_screen.dart';
 import '../../features/tasks/presentation/task_detail_screen.dart';
+import '../../features/pet/presentation/pet_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/splash',
@@ -42,6 +43,10 @@ final appRouter = GoRouter(
         final taskData = state.extra as Map<String, dynamic>;
         return TaskDetailScreen(taskId: taskId, taskData: taskData);
       },
+    ),
+    GoRoute(
+      path: '/pet',
+      builder: (context, state) => const PetScreen(),
     ),
   ],
 );

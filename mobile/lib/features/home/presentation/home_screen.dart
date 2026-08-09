@@ -17,7 +17,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               _buildHeader(),
               const SizedBox(height: 24),
-              _buildPetCanvas(),
+              _buildPetCanvas(context),
               const SizedBox(height: 28),
               _buildTodayTasksSection(context),
               const SizedBox(height: 28),
@@ -117,8 +117,10 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPetCanvas() {
-    return Container(
+  Widget _buildPetCanvas(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push('/pet'),
+      child: Container(
       height: 220,
       decoration: BoxDecoration(
         color: Colors.white,
@@ -209,8 +211,9 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildTodayTasksSection(BuildContext context) {
     final List<Map<String, dynamic>> mockTasks = [
