@@ -15,6 +15,7 @@ import '../../features/parent/presentation/parent_approval_screen.dart';
 import '../../features/notifications/presentation/notification_center_screen.dart';
 import '../../features/gallery/presentation/praise_gallery_screen.dart';
 import '../../features/pet/presentation/pet_selection_screen.dart';
+import '../../features/leaderboard/presentation/family_leaderboard_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/splash',
@@ -83,8 +84,13 @@ final appRouter = GoRouter(
       path: '/praise-gallery',
       builder: (context, state) => const PraiseGalleryScreen(),
     ),
+    GoRoute(
+      path: '/family/leaderboard',
+      builder: (context, state) => const FamilyLeaderboardScreen(),
+    ),
   ],
 );
+
 
 
 
