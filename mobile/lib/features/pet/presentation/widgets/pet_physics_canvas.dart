@@ -151,7 +151,7 @@ class _PetPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     if (isMouthOpen || expression == 'eating') {
-      final openMouthPaint = Paint()..color = Colors.deepPink.shade300;
+      final openMouthPaint = Paint()..color = Colors.pink.shade400;
       canvas.drawArc(
         Rect.fromCenter(center: Offset(center.dx, center.dy + 25), width: 30, height: 24),
         0,
