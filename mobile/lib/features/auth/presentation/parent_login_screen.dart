@@ -34,8 +34,8 @@ class _ParentLoginScreenState extends State<ParentLoginScreen> {
           setState(() {
             _isLoading = false;
           });
-          // Redirect to home or parent dashboard (we'll go to home for now)
-          context.go('/home');
+          // Redirect to parent dashboard
+          context.go('/parent/approval');
         }
       });
     }
