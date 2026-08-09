@@ -13,6 +13,7 @@ import '../../features/rewards/presentation/reward_list_screen.dart';
 import '../../features/stats/presentation/stats_screen.dart';
 import '../../features/parent/presentation/parent_approval_screen.dart';
 import '../../features/notifications/presentation/notification_center_screen.dart';
+import '../../features/gallery/presentation/praise_gallery_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/splash',
@@ -73,8 +74,13 @@ final appRouter = GoRouter(
       path: '/notifications',
       builder: (context, state) => const NotificationCenterScreen(),
     ),
+    GoRoute(
+      path: '/praise-gallery',
+      builder: (context, state) => const PraiseGalleryScreen(),
+    ),
   ],
 );
+
 
 
 
