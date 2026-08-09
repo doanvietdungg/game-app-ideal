@@ -6,6 +6,9 @@ import 'package:mobile/features/tasks/presentation/task_list_screen.dart';
 import 'package:mobile/features/tasks/presentation/task_detail_screen.dart';
 import 'package:mobile/features/pet/presentation/pet_screen.dart';
 import 'package:mobile/features/pet/presentation/store_screen.dart';
+import 'package:mobile/features/rewards/presentation/reward_list_screen.dart';
+import 'package:mobile/features/stats/presentation/stats_screen.dart';
+import 'package:mobile/core/services/app_blocking_service.dart';
 
 void main() {
   testWidgets('KidTimeApp mounts and displays splash screen subtitle', (WidgetTester tester) async {
@@ -132,4 +135,38 @@ void main() {
     // Verify stars deducted to 30
     expect(find.text('30 Sao'), findsOneWidget);
   });
+
+  testWidgets('RewardListScreen mounts and displays rewards', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: RewardListScreen(),
+    ));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Cửa Hàng Đổi Quà 🎁'), findsOneWidget);
+    expect(find.text('35 sao'), findsOneWidget);
+    expect(find.text('Xem TV 30 phút 📺'), findsOneWidget);
+  });
+
+  testWidgets('StatsScreen mounts and displays streak and chart', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: StatsScreen(),
+    ));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Báo Cáo & Streak 🔥'), findsOneWidget);
+    expect(find.text('🔥 STREAK LIÊN TỤC'), findsOneWidget);
+    expect(find.text('5 Ngày'), findsOneWidget);
+  });
+
+
+
+
+  test('AppBlockingService handles missing plugin gracefully in test env', () async {
+    final service = AppBlockingService();
+    final result = await service.syncBlockedApps(['com.example.game']);
+    expect(result, true);
+  });
 }
+

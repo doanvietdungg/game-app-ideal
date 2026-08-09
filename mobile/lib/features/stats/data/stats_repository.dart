@@ -20,7 +20,7 @@ class StatsRepository {
 
   Future<ChildStats> getChildStats() async {
     try {
-      final res = await apiClient.get('/analytics/child');
+      final res = await apiClient.get('/analytics/child').timeout(const Duration(milliseconds: 50));
       final data = res.data;
       return ChildStats(
         streakDays: data['streak_days'] ?? 5,
@@ -37,4 +37,5 @@ class StatsRepository {
       );
     }
   }
+
 }

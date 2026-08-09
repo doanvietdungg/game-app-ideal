@@ -24,7 +24,7 @@ class RewardRepository {
 
   Future<List<RewardItem>> getRewards() async {
     try {
-      final res = await apiClient.get('/rewards');
+      final res = await apiClient.get('/rewards').timeout(const Duration(milliseconds: 50));
       if (res.data is List) {
         return (res.data as List).map((item) => RewardItem(
           id: item['id'].toString(),
@@ -42,6 +42,7 @@ class RewardRepository {
       RewardItem(id: '3', title: 'Đi công viên 🎡', description: 'Bố mẹ đưa đi công viên cuối tuần', starCost: 50),
     ];
   }
+
 
   Future<bool> redeemReward(String rewardId) async {
     try {

@@ -83,7 +83,7 @@ class _StatsScreenState extends State<StatsScreen> {
                         height: 180,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          crossAxisAlignment: CrossAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: List.generate(7, (index) {
                             final count = _stats?.weeklyStars[index] ?? 0;
                             final heightRatio = (count / 12).clamp(0.1, 1.0);
