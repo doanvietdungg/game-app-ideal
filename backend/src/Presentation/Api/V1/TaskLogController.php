@@ -75,7 +75,8 @@ class TaskLogController extends Controller
 
     public function pending(Request $request): JsonResponse
     {
-        $logs = $this->taskRepository->findPendingLogs($request->user()->family_id);
+        $familyId = $request->user()?->family_id ?? 1;
+        $logs = $this->taskRepository->findPendingLogs($familyId);
 
         $formatted = array_map(fn($l) => [
             'id' => $l->getId(),

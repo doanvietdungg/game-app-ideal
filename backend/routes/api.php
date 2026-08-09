@@ -17,6 +17,11 @@ Route::prefix('v1')->group(function () {
     Route::post('auth/child-login', [AuthController::class, 'childLogin']);
     Route::post('pin/verify', [PinController::class, 'verify']);
 
+    // Task Logs approval public endpoints (for demo & app approvals)
+    Route::get('task-logs/pending', [TaskLogController::class, 'pending']);
+    Route::post('task-logs/{id}/approve', [TaskLogController::class, 'approve']);
+    Route::post('task-logs/{id}/reject', [TaskLogController::class, 'reject']);
+
     // Protected routes (Sanctum)
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('auth/logout', [AuthController::class, 'logout']);
@@ -32,11 +37,8 @@ Route::prefix('v1')->group(function () {
         Route::post('tasks', [TaskController::class, 'store']);
         Route::delete('tasks/{id}', [TaskController::class, 'destroy']);
 
-        // Task Logs routes
+        // Task Logs submission
         Route::post('task-logs', [TaskLogController::class, 'submit']);
-        Route::get('task-logs/pending', [TaskLogController::class, 'pending']);
-        Route::post('task-logs/{id}/approve', [TaskLogController::class, 'approve']);
-        Route::post('task-logs/{id}/reject', [TaskLogController::class, 'reject']);
 
         // Rewards routes
         Route::get('rewards', [RewardController::class, 'index']);
