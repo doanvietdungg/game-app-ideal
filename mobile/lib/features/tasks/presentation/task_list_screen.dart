@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/api/api_client.dart';
+import '../data/task_repository.dart';
 
 class TaskListScreen extends StatefulWidget {
   const TaskListScreen({super.key});
@@ -12,7 +14,7 @@ class TaskListScreen extends StatefulWidget {
 class _TaskListScreenState extends State<TaskListScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   List<Map<String, dynamic>> _tasks = [];
-  bool _isLoading = false;
+  bool _isLoading = true;
 
   final List<Map<String, String>> _categories = [
     {'key': 'all', 'label': 'Tất cả'},
@@ -59,6 +61,20 @@ class _TaskListScreenState extends State<TaskListScreen> with SingleTickerProvid
     super.initState();
     _tabController = TabController(length: _categories.length, vsync: this);
     _tasks = List.from(_mockTasks);
+    _loadTasksFromBackend();
+  }
+
+  Future<void> _loadTasksFromBackend() async {
+    final repo = TaskRepository(ApiClient());
+    final liveTasks = await repo.getTodayTasks(1);
+    if (mounted && liveTasks.isNotEmpty) {
+      setState(() {
+        _tasks = liveTasks;
+        _isLoading = false;
+      });
+    } else if (mounted) {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
