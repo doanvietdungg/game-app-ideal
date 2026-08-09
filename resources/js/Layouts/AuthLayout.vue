@@ -11,10 +11,11 @@ defineProps({
   <div class="min-h-screen bg-gradient-to-br from-primary-50 via-white to-sky-50 flex items-center justify-center p-4">
     <div :class="['w-full', maxWidth === 'lg' ? 'max-w-lg' : maxWidth === 'xl' ? 'max-w-xl' : 'max-w-md']">
       <div class="text-center mb-6">
-        <img src="/images/admin-logo.png" alt="KidTime Admin Logo" class="w-28 h-28 mx-auto mb-3 rounded-full shadow-lg object-cover bg-white" />
-        <h1 class="text-2xl font-extrabold text-gray-800">KidTime</h1>
+        <img src="/images/admin-logo.png" alt="KidTime Admin Logo" class="w-36 h-36 mx-auto mb-3 rounded-full shadow-xl object-cover bg-white border-4 border-white" />
+        <h1 class="text-3xl font-extrabold text-gray-800">KidTime</h1>
         <p class="text-gray-500 text-sm mt-1">Quản lý thời gian màn hình & thói quen cho trẻ</p>
       </div>
+
 
 
 

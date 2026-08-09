@@ -13,15 +13,16 @@ const flash = computed(() => page.props.flash)
     <!-- Sidebar -->
     <aside class="w-64 bg-white border-r border-gray-100 flex flex-col shadow-sm fixed inset-y-0 z-30">
       <!-- Logo -->
-      <div class="p-5 border-b border-gray-100">
+      <div class="p-4 border-b border-gray-100">
         <div class="flex items-center gap-3">
-          <img src="/images/admin-logo.png" alt="KidTime Admin Logo" class="w-12 h-12 rounded-full shadow-md object-cover bg-white" />
+          <img src="/images/admin-logo.png" alt="KidTime Admin Logo" class="w-16 h-16 rounded-full shadow-md object-cover bg-white shrink-0" />
           <div>
-            <span class="font-extrabold text-xl text-gray-800 tracking-tight">KidTime</span>
-            <p class="text-[10px] uppercase font-extrabold text-primary tracking-wider">Parent Hub</p>
+            <span class="font-extrabold text-2xl text-gray-800 tracking-tight leading-tight block">KidTime</span>
+            <p class="text-[11px] uppercase font-extrabold text-primary tracking-wider mt-0.5">Parent Hub</p>
           </div>
         </div>
       </div>
+
 
 
 
