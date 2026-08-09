@@ -1,6 +1,10 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import 'widgets/pet_physics_canvas.dart';
+import 'widgets/particle_overlay.dart';
+import 'widgets/draggable_food.dart';
 
 class PetScreen extends StatefulWidget {
   const PetScreen({super.key});
@@ -9,27 +13,77 @@ class PetScreen extends StatefulWidget {
   State<PetScreen> createState() => _PetScreenState();
 }
 
-class _PetScreenState extends State<PetScreen> {
+class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
   int _stars = 45;
-  double _hunger = 0.6; // 0.0 is starving, 1.0 is full
-  double _happiness = 0.8; // 0.0 is sad, 1.0 is happy
-  String _petExpression = '🐱';
+  double _hunger = 0.6;
+  double _happiness = 0.8;
   String _statusMessage = 'Mimi đang vui vẻ 😊';
+  String _expression = 'happy';
+
+  Offset? _touchOffset;
+  bool _isMouthOpen = false;
+  final GlobalKey _petKey = GlobalKey();
+
+  final List<ParticleItem> _particles = [];
+
+  double _scaleX = 1.0;
+  double _scaleY = 1.0;
+
+  void _triggerBounce() {
+    setState(() {
+      _scaleX = 1.15;
+      _scaleY = 0.85;
+    });
+    Future.delayed(const Duration(milliseconds: 150), () {
+      if (mounted) {
+        setState(() {
+          _scaleX = 0.95;
+          _scaleY = 1.05;
+        });
+      }
+    });
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        setState(() {
+          _scaleX = 1.0;
+          _scaleY = 1.0;
+        });
+      }
+    });
+  }
+
+  void _spawnParticles(Offset pos, String emoji, int count) {
+    final random = Random();
+    for (int i = 0; i < count; i++) {
+      _particles.add(
+        ParticleItem(
+          x: pos.dx + random.nextDouble() * 40 - 20,
+          y: pos.dy + random.nextDouble() * 40 - 20,
+          vx: (random.nextDouble() - 0.5) * 4,
+          vy: -random.nextDouble() * 4 - 2,
+          emoji: emoji,
+        ),
+      );
+    }
+  }
 
   void _feedPet() {
     if (_stars >= 2) {
       setState(() {
         _stars -= 2;
         _hunger = (_hunger + 0.15).clamp(0.0, 1.0);
-        _petExpression = '😋';
+        _expression = 'eating';
         _statusMessage = 'Mimi ăn ngon miệng lắm! 🍖';
+        _isMouthOpen = false;
       });
 
-      // Change back expression after 1.5 seconds
+      _triggerBounce();
+      _spawnParticles(Offset(MediaQuery.of(context).size.width / 2 - 20, 260), '⭐', 8);
+
       Future.delayed(const Duration(seconds: 1, milliseconds: 500), () {
         if (mounted) {
           setState(() {
-            _petExpression = '🐱';
+            _expression = 'happy';
             _statusMessage = _hunger > 0.85 ? 'Mimi no nê rồi! 💤' : 'Mimi đang vui vẻ 😊';
           });
         }
@@ -44,21 +98,38 @@ class _PetScreenState extends State<PetScreen> {
     }
   }
 
-  void _ticklePet() {
+  void _ticklePet(TapDownDetails details) {
     setState(() {
       _happiness = (_happiness + 0.1).clamp(0.0, 1.0);
-      _petExpression = '😸';
+      _expression = 'tickled';
       _statusMessage = 'Hahaha, nhột quá chủ nhân ơi! 😂';
     });
+
+    _triggerBounce();
+    _spawnParticles(details.globalPosition, '💖', 10);
 
     Future.delayed(const Duration(seconds: 1, milliseconds: 500), () {
       if (mounted) {
         setState(() {
-          _petExpression = '🐱';
+          _expression = 'happy';
           _statusMessage = 'Mimi đang vui vẻ 😊';
         });
       }
     });
+  }
+
+  void _checkMagnetAttraction(Offset dragPos) {
+    final RenderBox? box = _petKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box != null) {
+      final petPos = box.localToGlobal(Offset.zero);
+      final petCenter = Offset(petPos.dx + box.size.width / 2, petPos.dy + box.size.height / 2);
+      final distance = (dragPos - petCenter).distance;
+
+      setState(() {
+        _touchOffset = dragPos;
+        _isMouthOpen = distance < 100;
+      });
+    }
   }
 
   @override
@@ -78,158 +149,169 @@ class _PetScreenState extends State<PetScreen> {
         ),
         actions: [
           Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFFFF2D6), width: 1.5),
+              color: Colors.amber.shade100,
+              borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
               children: [
-                const Text('⭐ ', style: TextStyle(fontSize: 14)),
+                const Text('⭐ ', style: TextStyle(fontSize: 16)),
                 Text(
                   '$_stars Sao',
-                  style: const TextStyle(color: AppTheme.text, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontWeight: FontWeight.w900, color: Colors.deepOrange),
                 ),
               ],
             ),
           )
         ],
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Spacer(),
-              // Interactive Pet view
-              Center(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      width: 240,
-                      height: 240,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                        border: Border.all(color: AppTheme.primary.withOpacity(0.2), width: 4),
-                      ),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                // Status message bubble
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+                  ),
+                  child: Text(
+                    _statusMessage,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.text),
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                // Interactive Physics Canvas Center
+                GestureDetector(
+                  key: _petKey,
+                  onTapDown: _ticklePet,
+                  onPanUpdate: (details) {
+                    setState(() => _touchOffset = details.globalPosition);
+                  },
+                  onPanEnd: (_) {
+                    setState(() => _touchOffset = null);
+                  },
+                  child: Container(
+                    height: 240,
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                    child: PetPhysicsCanvas(
+                      touchOffset: _touchOffset,
+                      expression: _expression,
+                      scaleX: _scaleX,
+                      scaleY: _scaleY,
+                      isMouthOpen: _isMouthOpen,
                     ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _petExpression,
-                          style: const TextStyle(fontSize: 100),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          _statusMessage,
-                          style: const TextStyle(
-                            color: AppTheme.text,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Drag and drop prompt
+                const Text(
+                  '💡 Kéo đùi gà 🍖 đến miệng Mimi để cho ăn!',
+                  style: TextStyle(fontSize: 13, color: Colors.black54, fontStyle: FontStyle.italic),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Stats Progress Bars
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildStatRow('🍖 Độ no nê', _hunger, Colors.orange),
+                      const SizedBox(height: 12),
+                      _buildStatRow('💖 Vui vẻ', _happiness, Colors.pink),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Interactive Food & Action Controls
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    DraggableFoodItem(
+                      emoji: '🍖',
+                      label: 'Cho ăn (-2 ⭐)',
+                      onDragUpdate: _checkMagnetAttraction,
+                      onDragEnd: (pos) {
+                        if (_isMouthOpen) {
+                          _feedPet();
+                        } else {
+                          setState(() {
+                            _touchOffset = null;
+                            _isMouthOpen = false;
+                          });
+                        }
+                      },
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _ticklePet(TapDownDetails(globalPosition: const Offset(200, 300)));
+                      },
+                      icon: const Text('🪶', style: TextStyle(fontSize: 20)),
+                      label: const Text('Chọc nhột'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.pink.shade100,
+                        foregroundColor: Colors.pink.shade900,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      ),
                     ),
                   ],
                 ),
-              ),
-              const Spacer(),
-              // Stat bars
-              _buildProgressBar('🍖 Độ no nê', _hunger, AppTheme.primary),
-              const SizedBox(height: 20),
-              _buildProgressBar('❤️ Hạnh phúc', _happiness, AppTheme.accent),
-              const SizedBox(height: 48),
-              // Interaction Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildActionButton(
-                    icon: Icons.flatware_rounded,
-                    label: 'Cho ăn (-2 ⭐)',
-                    color: AppTheme.primary,
-                    onTap: _feedPet,
-                  ),
-                  _buildActionButton(
-                    icon: Icons.sentiment_very_satisfied_rounded,
-                    label: 'Chọc nhột',
-                    color: AppTheme.accent,
-                    onTap: _ticklePet,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-            ],
+              ],
+            ),
           ),
-        ),
+
+          // Particle Overlay Canvas
+          Positioned.fill(
+            child: ParticleOverlay(particles: _particles),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildProgressBar(String label, double value, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildStatRow(String label, double value, Color color) {
+    return Row(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: const TextStyle(color: AppTheme.text, fontWeight: FontWeight.bold, fontSize: 14),
+        SizedBox(width: 100, child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold))),
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: value,
+              minHeight: 12,
+              backgroundColor: color.withValues(alpha: 0.15),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
-            Text(
-              '${(value * 100).toInt()}%',
-              style: const TextStyle(color: AppTheme.textLight, fontWeight: FontWeight.bold, fontSize: 13),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: LinearProgressIndicator(
-            value: value,
-            minHeight: 12,
-            backgroundColor: const Color(0xFFF1EDE5),
-            valueColor: AlwaysStoppedAnimation<Color>(color == AppTheme.accent ? const Color(0xFFFF8DA1) : color),
           ),
         ),
+        const SizedBox(width: 12),
+        Text('${(value * 100).toInt()}%', style: const TextStyle(fontWeight: FontWeight.bold)),
       ],
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    final displayColor = color == AppTheme.accent ? const Color(0xFFFF8DA1) : color;
-    return ElevatedButton.icon(
-      onPressed: onTap,
-      icon: Icon(icon, color: Colors.white, size: 20),
-      label: Text(
-        label,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: displayColor,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        elevation: 2,
-      ),
     );
   }
 }
