@@ -6,6 +6,7 @@ import '../../features/auth/presentation/parent_login_screen.dart';
 import '../../features/auth/presentation/child_login_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/tasks/presentation/task_list_screen.dart';
+import '../../features/tasks/presentation/task_detail_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/splash',
@@ -33,6 +34,14 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/tasks',
       builder: (context, state) => const TaskListScreen(),
+    ),
+    GoRoute(
+      path: '/tasks/:id',
+      builder: (context, state) {
+        final taskId = int.parse(state.pathParameters['id']!);
+        final taskData = state.extra as Map<String, dynamic>;
+        return TaskDetailScreen(taskId: taskId, taskData: taskData);
+      },
     ),
   ],
 );

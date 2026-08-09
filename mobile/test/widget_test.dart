@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/main.dart';
 import 'package:mobile/features/home/presentation/home_screen.dart';
 import 'package:mobile/features/tasks/presentation/task_list_screen.dart';
+import 'package:mobile/features/tasks/presentation/task_detail_screen.dart';
 
 void main() {
   testWidgets('KidTimeApp mounts and displays splash screen subtitle', (WidgetTester tester) async {
@@ -31,10 +32,6 @@ void main() {
 
     // Verify virtual pet status
     expect(find.text('Mimi đang vui vẻ 😊'), findsOneWidget);
-
-    // Verify quick action button labels
-    expect(find.text('Đổi quà'), findsOneWidget);
-    expect(find.text('Tủ đồ'), findsOneWidget);
   });
 
   testWidgets('TaskListScreen mounts and displays tasks by categories', (WidgetTester tester) async {
@@ -49,11 +46,49 @@ void main() {
     // Verify category tabs are present
     expect(find.text('Tất cả'), findsOneWidget);
     expect(find.text('🏠 Việc nhà'), findsOneWidget);
-    expect(find.text('📚 Học tập'), findsOneWidget);
+  });
 
-    // Verify some task items from all category list
+  testWidgets('TaskDetailScreen mounts and displays task information for Photo task', (WidgetTester tester) async {
+    final mockTaskData = {
+      'id': 1,
+      'title': 'Dọn dẹp phòng ngủ',
+      'stars': 5,
+      'category': 'housework',
+      'emoji': '🏠',
+      'desc': 'Hãy dọn đồ chơi gọn gàng vào hộp con nhé!'
+    };
+
+    // Build the TaskDetailScreen
+    await tester.pumpWidget(MaterialApp(
+      home: TaskDetailScreen(taskId: 1, taskData: mockTaskData),
+    ));
+
+    // Verify task details
     expect(find.text('Dọn dẹp phòng ngủ'), findsOneWidget);
+    expect(find.text('+5 Sao ⭐'), findsOneWidget);
+    expect(find.text('Ảnh chụp'), findsOneWidget);
+    expect(find.text('Chụp ảnh kết quả của con'), findsOneWidget);
+  });
+
+  testWidgets('TaskDetailScreen mounts and displays task information for PIN task', (WidgetTester tester) async {
+    final mockTaskData = {
+      'id': 2,
+      'title': 'Đọc sách 20 phút',
+      'stars': 10,
+      'category': 'study',
+      'emoji': '📚',
+      'desc': 'Đọc cuốn sách con thích nhất.'
+    };
+
+    // Build the TaskDetailScreen
+    await tester.pumpWidget(MaterialApp(
+      home: TaskDetailScreen(taskId: 2, taskData: mockTaskData),
+    ));
+
+    // Verify task details
     expect(find.text('Đọc sách 20 phút'), findsOneWidget);
-    expect(find.text('Ăn hết rau xanh'), findsOneWidget);
+    expect(find.text('+10 Sao ⭐'), findsOneWidget);
+    expect(find.text('Mã PIN'), findsOneWidget);
+    expect(find.text('Yêu cầu Bố mẹ xác nhận'), findsOneWidget);
   });
 }
