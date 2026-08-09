@@ -12,6 +12,7 @@ import 'package:mobile/features/stats/presentation/stats_screen.dart';
 import 'package:mobile/features/parent/presentation/parent_approval_screen.dart';
 import 'package:mobile/features/notifications/presentation/notification_center_screen.dart';
 import 'package:mobile/features/gallery/presentation/praise_gallery_screen.dart';
+import 'package:mobile/features/pet/presentation/pet_selection_screen.dart';
 import 'package:mobile/core/services/app_blocking_service.dart';
 
 void main() {
@@ -202,6 +203,18 @@ void main() {
     expect(find.text('Góc Kỷ Niệm & Lời Khen 💖'), findsOneWidget);
     expect(find.text('Dọn dẹp phòng ngủ 🏠'), findsOneWidget);
     expect(find.text('Xuất sắc!'), findsOneWidget);
+  });
+
+  testWidgets('PetSelectionScreen mounts and displays multi-species options', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: PetSelectionScreen(),
+    ));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Chọn Loài Thú Cưng 🐾'), findsOneWidget);
+    expect(find.text('Chó Rex 🐶'), findsOneWidget);
+    expect(find.text('Rồng Spark 🐉'), findsOneWidget);
   });
 
   test('AppBlockingService handles missing plugin gracefully in test env', () async {

@@ -153,9 +153,48 @@ class _StatsScreenState extends State<StatsScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 20),
+
+                  // Achievement Badges Section
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('🏆 HUY CHƯƠNG THÀNH TÍCH', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.deepOrange)),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _buildBadgeCard('🔥', 'Streak 7 Ngày', 'Đã mở khóa', Colors.orange.shade100),
+                      const SizedBox(width: 8),
+                      _buildBadgeCard('📚', 'Dũng Sĩ Đọc Sách', 'Đã mở khóa', Colors.blue.shade100),
+                      const SizedBox(width: 8),
+                      _buildBadgeCard('⭐', 'Ngôi Sao Chăm Chỉ', 'Khóa', Colors.grey.shade200),
+                    ],
+                  ),
                 ],
               ),
             ),
     );
   }
+
+  Widget _buildBadgeCard(String emoji, String title, String status, Color bgColor) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 28)),
+            const SizedBox(height: 6),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11), textAlign: TextAlign.center),
+            const SizedBox(height: 4),
+            Text(status, style: const TextStyle(fontSize: 10, color: Colors.black54)),
+          ],
+        ),
+      ),
+    );
+  }
 }
+
