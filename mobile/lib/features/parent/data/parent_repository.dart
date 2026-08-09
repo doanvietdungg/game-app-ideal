@@ -24,42 +24,35 @@ class ParentRepository {
 
   Future<List<PendingTaskItem>> getPendingTasks() async {
     try {
-      final res = await apiClient.get('/tasks/pending').timeout(const Duration(milliseconds: 50));
-      if (res.data is List) {
-        return (res.data as List).map((item) => PendingTaskItem(
+      final res = await apiClient.get('/v1/task-logs/pending').timeout(const Duration(seconds: 5));
+      final List data = res.data['data'] ?? res.data;
+      if (data is List) {
+        return data.map((item) => PendingTaskItem(
           id: item['id'].toString(),
-          childName: item['child_name'] ?? 'Bé Nam',
-          taskTitle: item['task_title'] ?? 'Dọn dẹp phòng',
-          stars: item['stars'] ?? 5,
-          photoUrl: item['photo_url'] ?? '',
+          childName: item['child_name'] ?? item['child']?['name'] ?? 'Bé Nam 👦',
+          taskTitle: item['task_title'] ?? item['task']?['title'] ?? 'Dọn dẹp phòng ngủ 🏠',
+          stars: item['stars'] ?? item['task']?['stars'] ?? 5,
+          photoUrl: item['photo_url'] ?? item['photo_path'] ?? 'https://via.placeholder.com/300',
           submittedAt: item['submitted_at'] ?? 'Hôm nay, 14:30',
         )).toList();
       }
     } catch (_) {}
     return [
       PendingTaskItem(
-        id: '101',
+        id: '1',
         childName: 'Bé Nam 👦',
         taskTitle: 'Dọn dẹp phòng ngủ 🏠',
         stars: 5,
         photoUrl: 'https://via.placeholder.com/300',
         submittedAt: 'Hôm nay, 14:30',
       ),
-      PendingTaskItem(
-        id: '102',
-        childName: 'Bé Nam 👦',
-        taskTitle: 'Đọc sách 20 phút 📚',
-        stars: 10,
-        photoUrl: 'https://via.placeholder.com/300',
-        submittedAt: 'Hôm nay, 16:15',
-      ),
     ];
   }
 
   Future<bool> approveTask(String taskId) async {
     try {
-      final res = await apiClient.post('/tasks/$taskId/approve');
-      return res.statusCode == 200 || res.statusCode == 201;
+      final res = await apiClient.post('/v1/task-logs/$taskId/approve');
+      return res.statusCode == 200 || res.statusCode == 201 || res.data['status'] == true;
     } catch (_) {
       return true;
     }
@@ -67,8 +60,8 @@ class ParentRepository {
 
   Future<bool> rejectTask(String taskId, String reason) async {
     try {
-      final res = await apiClient.post('/tasks/$taskId/reject', data: {'reason': reason});
-      return res.statusCode == 200 || res.statusCode == 201;
+      final res = await apiClient.post('/v1/task-logs/$taskId/reject', data: {'reason': reason});
+      return res.statusCode == 200 || res.statusCode == 201 || res.data['status'] == true;
     } catch (_) {
       return true;
     }
