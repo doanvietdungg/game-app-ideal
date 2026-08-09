@@ -22,6 +22,14 @@ Route::prefix('v1')->group(function () {
     Route::post('task-logs/{id}/approve', [TaskLogController::class, 'approve']);
     Route::post('task-logs/{id}/reject', [TaskLogController::class, 'reject']);
 
+    // Mobile Profile & Tasks public endpoints for mobile app
+    Route::get('children/{id}/profile', [MobileProfileController::class, 'profile']);
+    Route::get('children/{id}/tasks/today', [MobileProfileController::class, 'todayTasks']);
+
+    // Mobile Rewards public endpoints
+    Route::get('rewards', [RewardController::class, 'index']);
+    Route::post('rewards/{id}/redeem', [RewardController::class, 'redeem']);
+
     // Protected routes (Sanctum)
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('auth/logout', [AuthController::class, 'logout']);
@@ -49,8 +57,6 @@ Route::prefix('v1')->group(function () {
         Route::get('analytics/weekly/{childId}', [AnalyticsController::class, 'weekly']);
 
         // Mobile profile & custom support endpoints
-        Route::get('children/{id}/profile', [MobileProfileController::class, 'profile']);
-        Route::get('children/{id}/tasks/today', [MobileProfileController::class, 'todayTasks']);
         Route::post('children/{id}/pet/skin', [MobileProfileController::class, 'changeOrUnlockSkin']);
         Route::post('notifications/register', [MobileProfileController::class, 'registerFcmToken']);
         Route::post('blocking/apps', [MobileProfileController::class, 'syncApps']);

@@ -51,7 +51,6 @@ class MobileProfileController extends Controller
             ->get();
 
         $logs = TaskLogModel::where('child_id', $id)
-            ->whereDate('due_date', today())
             ->get()
             ->keyBy('task_id');
 
@@ -59,8 +58,12 @@ class MobileProfileController extends Controller
             'id' => $t->id,
             'title' => $t->title,
             'stars' => $t->stars,
-            'icon' => $t->icon,
-            'status' => isset($logs[$t->id]) ? $logs[$t->id]->status : 'todo',
+            'category' => $t->category,
+            'emoji' => $t->icon ?? '📋',
+            'desc' => $t->description ?? '',
+            'status' => isset($logs[$t->id]) 
+                ? ($logs[$t->id]->status instanceof \BackedEnum ? $logs[$t->id]->status->value : (string)$logs[$t->id]->status) 
+                : 'todo',
         ]);
 
         return response()->json([

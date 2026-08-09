@@ -18,7 +18,8 @@ class RewardController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $rewards = $this->rewardRepository->findByFamilyId($request->user()->family_id);
+        $familyId = $request->user()?->family_id ?? 1;
+        $rewards = $this->rewardRepository->findByFamilyId($familyId);
 
         $formatted = array_map(fn($r) => [
             'id' => $r->getId(),
