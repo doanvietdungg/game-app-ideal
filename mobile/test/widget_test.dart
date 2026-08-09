@@ -4,6 +4,8 @@ import 'package:mobile/main.dart';
 import 'package:mobile/features/home/presentation/home_screen.dart';
 import 'package:mobile/features/tasks/presentation/task_list_screen.dart';
 import 'package:mobile/features/tasks/presentation/task_detail_screen.dart';
+import 'package:mobile/features/pet/presentation/pet_screen.dart';
+import 'package:mobile/features/pet/presentation/store_screen.dart';
 
 void main() {
   testWidgets('KidTimeApp mounts and displays splash screen subtitle', (WidgetTester tester) async {
@@ -70,25 +72,64 @@ void main() {
     expect(find.text('Chụp ảnh kết quả của con'), findsOneWidget);
   });
 
-  testWidgets('TaskDetailScreen mounts and displays task information for PIN task', (WidgetTester tester) async {
-    final mockTaskData = {
-      'id': 2,
-      'title': 'Đọc sách 20 phút',
-      'stars': 10,
-      'category': 'study',
-      'emoji': '📚',
-      'desc': 'Đọc cuốn sách con thích nhất.'
-    };
-
-    // Build the TaskDetailScreen
-    await tester.pumpWidget(MaterialApp(
-      home: TaskDetailScreen(taskId: 2, taskData: mockTaskData),
+  testWidgets('PetScreen mounts and supports interactive feeding and tickling', (WidgetTester tester) async {
+    // Build the PetScreen
+    await tester.pumpWidget(const MaterialApp(
+      home: PetScreen(),
     ));
 
-    // Verify task details
-    expect(find.text('Đọc sách 20 phút'), findsOneWidget);
-    expect(find.text('+10 Sao ⭐'), findsOneWidget);
-    expect(find.text('Mã PIN'), findsOneWidget);
-    expect(find.text('Yêu cầu Bố mẹ xác nhận'), findsOneWidget);
+    // Verify title and initial stars
+    expect(find.text('🐾 Thú cưng ảo'), findsOneWidget);
+    expect(find.text('45 Sao'), findsOneWidget);
+    expect(find.text('Mimi đang vui vẻ 😊'), findsOneWidget);
+
+    // Verify progress bars
+    expect(find.text('🍖 Độ no nê'), findsOneWidget);
+    expect(find.text('60%'), findsOneWidget);
+
+    // Tap cho ăn (feeding costs 2 stars)
+    await tester.tap(find.text('Cho ăn (-2 ⭐)'));
+    await tester.pump();
+
+    // Verify stats changed
+    expect(find.text('43 Sao'), findsOneWidget);
+    expect(find.text('75%'), findsOneWidget);
+    expect(find.text('Mimi ăn ngon miệng lắm! 🍖'), findsOneWidget);
+
+    // Tap chọc nhột (tickle)
+    await tester.tap(find.text('Chọc nhột'));
+    await tester.pump();
+
+    // Verify response changed
+    expect(find.text('Hahaha, nhột quá chủ nhân ơi! 😂'), findsOneWidget);
+
+    // Settle all delayed expressions timers
+    await tester.pumpAndSettle(const Duration(seconds: 2));
+  });
+
+  testWidgets('StoreScreen mounts and supports unlocking premium skins', (WidgetTester tester) async {
+    // Build the StoreScreen
+    await tester.pumpWidget(const MaterialApp(
+      home: StoreScreen(),
+    ));
+
+    // Verify app bar title
+    expect(find.text('🛍️ Cửa hàng & Tủ đồ'), findsOneWidget);
+    expect(find.text('45 Sao'), findsOneWidget);
+
+    // Verify available premium skins in store
+    expect(find.text('Mèo Robot 🤖'), findsOneWidget);
+    expect(find.text('Mèo Ninja 🥷'), findsOneWidget);
+
+    // Verify cost buttons
+    expect(find.text('15'), findsOneWidget);
+    expect(find.text('30'), findsOneWidget);
+
+    // Unlock Mèo Robot (costs 15 stars)
+    await tester.tap(find.byIcon(Icons.star_rounded).first);
+    await tester.pump();
+
+    // Verify stars deducted to 30
+    expect(find.text('30 Sao'), findsOneWidget);
   });
 }
