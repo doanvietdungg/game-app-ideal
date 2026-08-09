@@ -1,0 +1,54 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD166"/>
+      <stop offset="100%" stop-color="#FF9F43"/>
+    </linearGradient>
+    <linearGradient id="clockGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#FFF6E5"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4ECDC4"/>
+      <stop offset="100%" stop-color="#2FA9A1"/>
+    </linearGradient>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#00000022"/>
+    </filter>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect x="16" y="16" width="480" height="480" rx="120" fill="url(#bgGrad)"/>
+
+  <!-- Decorative stars -->
+  <circle cx="110" cy="120" r="10" fill="#FFFFFF" opacity="0.7"/>
+  <circle cx="410" cy="140" r="7" fill="#FFFFFF" opacity="0.6"/>
+  <circle cx="400" cy="380" r="9" fill="#FFFFFF" opacity="0.55"/>
+  <circle cx="95" cy="370" r="6" fill="#FFFFFF" opacity="0.6"/>
+
+  <!-- Clock face -->
+  <circle cx="256" cy="256" r="150" fill="url(#clockGrad)" filter="url(#softShadow)"/>
+  <circle cx="256" cy="256" r="150" fill="none" stroke="#FF9F43" stroke-width="10"/>
+
+  <!-- Clock ticks -->
+  <g stroke="#FF9F43" stroke-width="8" stroke-linecap="round">
+    <line x1="256" y1="126" x2="256" y2="150"/>
+    <line x1="256" y1="362" x2="256" y2="386"/>
+    <line x1="126" y1="256" x2="150" y2="256"/>
+    <line x1="362" y1="256" x2="386" y2="256"/>
+  </g>
+
+  <!-- Smiling face on clock -->
+  <circle cx="216" cy="240" r="12" fill="#2F3542"/>
+  <circle cx="296" cy="240" r="12" fill="#2F3542"/>
+  <path d="M210 285 Q256 325 302 285" fill="none" stroke="#2F3542" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- Clock hands forming a playful shape -->
+  <line x1="256" y1="256" x2="256" y2="190" stroke="#4ECDC4" stroke-width="12" stroke-linecap="round"/>
+  <line x1="256" y1="256" x2="305" y2="256" stroke="#FF6B6B" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="14" fill="#2F3542"/>
+
+  <!-- Bottom banner with text -->
+  <rect x="86" y="392" width="340" height="72" rx="36" fill="url(#accentGrad)" filter="url(#softShadow)"/>
+  <text x="256" y="440" font-family="Verdana, Arial, sans-serif" font-size="40" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Kid Time</text>
+</svg>
