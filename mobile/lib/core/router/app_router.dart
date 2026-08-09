@@ -4,6 +4,7 @@ import '../../features/auth/presentation/splash_screen.dart';
 import '../../features/auth/presentation/role_selection_screen.dart';
 import '../../features/auth/presentation/parent_login_screen.dart';
 import '../../features/auth/presentation/child_login_screen.dart';
+import '../../features/home/presentation/home_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/splash',
@@ -26,11 +27,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/home',
-      builder: (context, state) => const Scaffold(
-        body: Center(
-          child: Text('Màn hình chính của Bé', style: TextStyle(fontSize: 20)),
-        ),
-      ),
+      builder: (context, state) => const HomeScreen(),
     ),
   ],
 );
