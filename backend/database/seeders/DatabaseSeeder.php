@@ -27,19 +27,20 @@ class DatabaseSeeder extends Seeder
         $this->call(TaskTemplateSeeder::class);
 
         // 2. Parent Account & Family
+        $family = FamilyModel::firstOrCreate(
+            ['name' => 'Gia Đình Nguyễn 🏠'],
+            [
+                'pin' => Hash::make('1234'),
+            ]
+        );
+
         $parent = User::updateOrCreate(
             ['email' => 'parent@kidtime.com'],
             [
                 'name' => 'Bố Nguyễn Văn Hùng',
                 'password' => Hash::make('password123'),
                 'role' => 'parent',
-            ]
-        );
-
-        $family = FamilyModel::firstOrCreate(
-            ['name' => 'Gia Đình Nguyễn 🏠'],
-            [
-                'pin' => Hash::make('1234'),
+                'family_id' => $family->id,
             ]
         );
 
