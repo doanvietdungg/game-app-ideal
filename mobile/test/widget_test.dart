@@ -13,6 +13,7 @@ import 'package:mobile/features/parent/presentation/parent_approval_screen.dart'
 import 'package:mobile/features/notifications/presentation/notification_center_screen.dart';
 import 'package:mobile/features/gallery/presentation/praise_gallery_screen.dart';
 import 'package:mobile/features/pet/presentation/pet_selection_screen.dart';
+import 'package:mobile/features/leaderboard/presentation/family_leaderboard_screen.dart';
 import 'package:mobile/core/services/app_blocking_service.dart';
 
 void main() {
@@ -215,6 +216,18 @@ void main() {
     expect(find.text('Chọn Loài Thú Cưng 🐾'), findsOneWidget);
     expect(find.text('Chó Rex 🐶'), findsOneWidget);
     expect(find.text('Rồng Spark 🐉'), findsOneWidget);
+  });
+
+  testWidgets('FamilyLeaderboardScreen mounts and displays podium', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: FamilyLeaderboardScreen(),
+    ));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Bảng Xếp Hạng Thi Đua 🏆'), findsOneWidget);
+    expect(find.text('🥇'), findsOneWidget);
+    expect(find.text('🥈'), findsOneWidget);
   });
 
   test('AppBlockingService handles missing plugin gracefully in test env', () async {

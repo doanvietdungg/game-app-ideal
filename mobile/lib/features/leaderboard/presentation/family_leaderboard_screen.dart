@@ -93,7 +93,7 @@ class _FamilyLeaderboardScreenState extends State<FamilyLeaderboardScreen> {
                   if (_members.length >= 3) ...[
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         // Rank 2 (Silver)
                         _buildPodiumColumn(_members[1], 110, Colors.grey.shade300, '🥈'),
