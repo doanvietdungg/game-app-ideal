@@ -10,6 +10,7 @@ import 'package:mobile/features/pet/presentation/store_screen.dart';
 import 'package:mobile/features/rewards/presentation/reward_list_screen.dart';
 import 'package:mobile/features/stats/presentation/stats_screen.dart';
 import 'package:mobile/features/parent/presentation/parent_approval_screen.dart';
+import 'package:mobile/features/notifications/presentation/notification_center_screen.dart';
 import 'package:mobile/core/services/app_blocking_service.dart';
 
 void main() {
@@ -177,6 +178,17 @@ void main() {
     expect(find.text('Phụ Huynh — Duyệt Bài 👨‍👩‍👧'), findsOneWidget);
     expect(find.text('Dọn dẹp phòng ngủ 🏠'), findsOneWidget);
     expect(find.text('Duyệt bài'), findsWidgets);
+  });
+
+  testWidgets('NotificationCenterScreen mounts and displays notifications', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: NotificationCenterScreen(),
+    ));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Thông Báo 🔔'), findsOneWidget);
+    expect(find.text('🎉 Bài tập đã được duyệt!'), findsOneWidget);
   });
 
   test('AppBlockingService handles missing plugin gracefully in test env', () async {
