@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
@@ -12,6 +13,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -29,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     _controller.forward();
 
     // Auto redirect after 2.5 seconds
-    Future.delayed(const Duration(seconds: 2, milliseconds: 500), () {
+    _timer = Timer(const Duration(seconds: 2, milliseconds: 500), () {
       if (mounted) {
         context.go('/role-selection');
       }
@@ -38,6 +40,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   void dispose() {
+    _timer?.cancel();
     _controller.dispose();
     super.dispose();
   }

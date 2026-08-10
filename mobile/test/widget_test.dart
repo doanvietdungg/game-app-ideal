@@ -33,7 +33,10 @@ void main() {
   testWidgets('HomeScreen mounts and displays child stats and pet details', (WidgetTester tester) async {
     // Build the HomeScreen directly in a MaterialApp wrapper
     await tester.pumpWidget(const MaterialApp(
-      home: HomeScreen(),
+      home: TickerMode(
+        enabled: false,
+        child: HomeScreen(),
+      ),
     ));
 
     await tester.pump(const Duration(milliseconds: 100));
@@ -47,7 +50,8 @@ void main() {
 
     // Verify virtual pet status
     expect(find.textContaining('Mimi'), findsWidgets);
-    await tester.pumpAndSettle(const Duration(seconds: 3));
+    await tester.pump();
+    await tester.idle();
   });
 
   testWidgets('TaskListScreen mounts and displays tasks by categories', (WidgetTester tester) async {

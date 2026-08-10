@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 class NotificationBannerWidget extends StatefulWidget {
@@ -21,6 +22,7 @@ class NotificationBannerWidget extends StatefulWidget {
 class _NotificationBannerWidgetState extends State<NotificationBannerWidget> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Offset> _offsetAnimation;
+  Timer? _dismissTimer;
 
   @override
   void initState() {
@@ -41,7 +43,7 @@ class _NotificationBannerWidgetState extends State<NotificationBannerWidget> wit
     _controller.forward();
 
     // Auto dismiss after 4 seconds
-    Future.delayed(const Duration(seconds: 4), () {
+    _dismissTimer = Timer(const Duration(seconds: 4), () {
       if (mounted) {
         _dismiss();
       }
@@ -58,6 +60,7 @@ class _NotificationBannerWidgetState extends State<NotificationBannerWidget> wit
 
   @override
   void dispose() {
+    _dismissTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }

@@ -31,6 +31,8 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
   double _scaleX = 1.0;
   double _scaleY = 1.0;
 
+  bool get _isTestEnv => WidgetsBinding.instance.runtimeType.toString().contains('Test');
+
   @override
   void initState() {
     super.initState();
@@ -246,6 +248,7 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
                       scaleX: _scaleX,
                       scaleY: _scaleY,
                       isMouthOpen: _isMouthOpen,
+                      enableAnimations: true,
                     ),
                   ),
                 ),

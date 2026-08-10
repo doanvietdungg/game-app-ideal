@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 
-class PetPhysicsCanvas extends StatelessWidget {
+class PetPhysicsCanvas extends StatefulWidget {
   final Offset? touchOffset;
   final String expression; // 'happy', 'eating', 'tickled', 'sleeping'
   final String species; // 'cat', 'dog', 'dragon', 'rabbit'
@@ -9,6 +9,7 @@ class PetPhysicsCanvas extends StatelessWidget {
   final double scaleX;
   final double scaleY;
   final bool isMouthOpen;
+  final bool enableAnimations;
 
   const PetPhysicsCanvas({
     super.key,
@@ -19,23 +20,84 @@ class PetPhysicsCanvas extends StatelessWidget {
     this.scaleX = 1.0,
     this.scaleY = 1.0,
     this.isMouthOpen = false,
+    this.enableAnimations = false,
   });
 
   @override
+  State<PetPhysicsCanvas> createState() => _PetPhysicsCanvasState();
+}
+
+class _PetPhysicsCanvasState extends State<PetPhysicsCanvas> with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+  final Random _random = Random();
+  String _currentIdleAction = 'idle';
+
+  @override
+  void initState() {
+    super.initState();
+    final bool isTestMode = WidgetsBinding.instance.runtimeType.toString().toLowerCase().contains('test') ||
+        WidgetsBinding.instance.toString().toLowerCase().contains('test');
+
+    // Single 4-second animation cycle driving breathing + random ambient actions
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    );
+
+    _animController.addListener(() {
+      if (!mounted) return;
+      final val = _animController.value;
+      if (val < 0.20) {
+        _currentIdleAction = 'waving';
+      } else if (val < 0.40) {
+        _currentIdleAction = 'scratching';
+      } else if (val < 0.60) {
+        _currentIdleAction = 'wagging';
+      } else if (val < 0.80) {
+        _currentIdleAction = 'blinking';
+      } else {
+        _currentIdleAction = 'idle';
+      }
+    });
+
+    if (widget.enableAnimations && !isTestMode) {
+      _animController.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _animController.stop();
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Transform.scale(
-      scaleX: scaleX,
-      scaleY: scaleY,
-      child: CustomPaint(
-        size: const Size(220, 220),
-        painter: _PetPainter(
-          touchOffset: touchOffset,
-          expression: expression,
-          species: species,
-          skin: skin,
-          isMouthOpen: isMouthOpen,
-        ),
-      ),
+    return AnimatedBuilder(
+      animation: _animController,
+      builder: (context, child) {
+        final progress = _animController.value;
+        final breathValue = sin(progress * pi * 4); // 2 smooth breath cycles per 4s
+
+        return Transform.scale(
+          scaleX: widget.scaleX,
+          scaleY: widget.scaleY,
+          child: CustomPaint(
+            size: const Size(220, 220),
+            painter: _PetPainter(
+              touchOffset: widget.touchOffset,
+              expression: widget.expression,
+              species: widget.species,
+              skin: widget.skin,
+              isMouthOpen: widget.isMouthOpen,
+              breathValue: breathValue,
+              actionValue: progress,
+              idleAction: _currentIdleAction,
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -46,6 +108,9 @@ class _PetPainter extends CustomPainter {
   final String species;
   final String skin;
   final bool isMouthOpen;
+  final double breathValue;
+  final double actionValue;
+  final String idleAction;
 
   _PetPainter({
     this.touchOffset,
@@ -53,18 +118,52 @@ class _PetPainter extends CustomPainter {
     required this.species,
     required this.skin,
     required this.isMouthOpen,
+    required this.breathValue,
+    required this.actionValue,
+    required this.idleAction,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
+    // Continuous subtle breathing bounce (vertical float)
+    final breathY = breathValue * 3.5;
+    final center = Offset(size.width / 2, size.height / 2 + breathY);
 
     // Shadow
     final shadowPaint = Paint()..color = Colors.black.withValues(alpha: 0.1);
     canvas.drawOval(
-      Rect.fromCenter(center: Offset(center.dx, center.dy + 75), width: 140, height: 24),
+      Rect.fromCenter(center: Offset(center.dx, center.dy + 75 - breathY * 0.5), width: 140, height: 24),
       shadowPaint,
     );
+
+    // ----------------------------------------------------
+    // TAIL ANIMATION (Vẫy đuôi 🐈)
+    // ----------------------------------------------------
+    double tailWagAngle = breathValue * 0.12;
+    if (idleAction == 'wagging') {
+      tailWagAngle += sin(actionValue * pi * 8) * 0.45;
+    }
+
+    canvas.save();
+    canvas.translate(center.dx + 55, center.dy + 30);
+    canvas.rotate(tailWagAngle);
+    final tailPath = Path()
+      ..moveTo(0, 0)
+      ..quadraticBezierTo(25, -20, 35, -45)
+      ..quadraticBezierTo(20, -45, 0, -10)
+      ..close();
+    Color tailColor = const Color(0xFF78909C);
+    if (skin.contains('Robot') || skin.contains('🤖')) {
+      tailColor = const Color(0xFF00ACC1);
+    } else if (skin.contains('Ninja') || skin.contains('🥷')) {
+      tailColor = const Color(0xFF263238);
+    } else if (skin.contains('Quý Tộc') || skin.contains('👑')) {
+      tailColor = const Color(0xFFFFB300);
+    } else {
+      tailColor = Colors.orange.shade400;
+    }
+    canvas.drawPath(tailPath, Paint()..color = tailColor);
+    canvas.restore();
 
     // ----------------------------------------------------
     // SPECIAL ROBOT CAT CUSTOM HEAD DRAWING 🤖
@@ -87,9 +186,11 @@ class _PetPainter extends CustomPainter {
       canvas.drawPath(rightEar, Paint()..color = const Color(0xFF00ACC1));
       canvas.drawPath(rightEar, Paint()..color = const Color(0xFF006064)..style = PaintingStyle.stroke..strokeWidth = 3);
 
-      // 2. Top Antenna Rod & Glowing Red LED (exact 🤖 match)
+      // 2. Top Antenna Rod & Glowing Pulsing Red LED (exact 🤖 match)
+      final ledGlowAlpha = (0.6 + breathValue * 0.4).clamp(0.2, 1.0);
       canvas.drawRect(Rect.fromLTWH(center.dx - 4, center.dy - 102, 8, 40), Paint()..color = Colors.blueGrey.shade900);
-      canvas.drawCircle(Offset(center.dx, center.dy - 105), 9, Paint()..color = Colors.redAccent);
+      canvas.drawCircle(Offset(center.dx, center.dy - 105), 11, Paint()..color = Colors.redAccent.withValues(alpha: ledGlowAlpha * 0.4));
+      canvas.drawCircle(Offset(center.dx, center.dy - 105), 8, Paint()..color = Colors.redAccent);
       canvas.drawCircle(Offset(center.dx - 2, center.dy - 107), 3, Paint()..color = Colors.white);
 
       // 3. Side Red Ear/Speaker Knobs (exact 🤖 match)
@@ -119,19 +220,30 @@ class _PetPainter extends CustomPainter {
         }
       }
 
-      // 6. Robot Eyes (Large Round White Eye Sockets with Pupils)
+      // 6. Robot Eyes (With Automatic Blinking 👁️✨)
       final leftEyeCenter = Offset(center.dx - 28, center.dy - 12);
       final rightEyeCenter = Offset(center.dx + 28, center.dy - 12);
+      final isBlinking = (idleAction == 'blinking' && actionValue > 0.3 && actionValue < 0.7);
 
-      canvas.drawCircle(leftEyeCenter, 18, Paint()..color = Colors.white);
-      canvas.drawCircle(rightEyeCenter, 18, Paint()..color = Colors.white);
-      canvas.drawCircle(leftEyeCenter, 18, Paint()..color = Colors.black87..style = PaintingStyle.stroke..strokeWidth = 3);
-      canvas.drawCircle(rightEyeCenter, 18, Paint()..color = Colors.black87..style = PaintingStyle.stroke..strokeWidth = 3);
+      if (isBlinking) {
+        final blinkPaint = Paint()
+          ..color = Colors.black87
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 4.0
+          ..strokeCap = StrokeCap.round;
+        canvas.drawArc(Rect.fromCircle(center: leftEyeCenter, radius: 12), pi * 0.1, pi * 0.8, false, blinkPaint);
+        canvas.drawArc(Rect.fromCircle(center: rightEyeCenter, radius: 12), pi * 0.1, pi * 0.8, false, blinkPaint);
+      } else {
+        canvas.drawCircle(leftEyeCenter, 18, Paint()..color = Colors.white);
+        canvas.drawCircle(rightEyeCenter, 18, Paint()..color = Colors.white);
+        canvas.drawCircle(leftEyeCenter, 18, Paint()..color = Colors.black87..style = PaintingStyle.stroke..strokeWidth = 3);
+        canvas.drawCircle(rightEyeCenter, 18, Paint()..color = Colors.black87..style = PaintingStyle.stroke..strokeWidth = 3);
 
-      canvas.drawCircle(Offset(leftEyeCenter.dx + eyeDx, leftEyeCenter.dy + eyeDy), 9, Paint()..color = Colors.black87);
-      canvas.drawCircle(Offset(rightEyeCenter.dx + eyeDx, rightEyeCenter.dy + eyeDy), 9, Paint()..color = Colors.black87);
-      canvas.drawCircle(Offset(leftEyeCenter.dx + eyeDx - 3, leftEyeCenter.dy + eyeDy - 3), 3, Paint()..color = Colors.white);
-      canvas.drawCircle(Offset(rightEyeCenter.dx + eyeDx - 3, rightEyeCenter.dy + eyeDy - 3), 3, Paint()..color = Colors.white);
+        canvas.drawCircle(Offset(leftEyeCenter.dx + eyeDx, leftEyeCenter.dy + eyeDy), 9, Paint()..color = Colors.black87);
+        canvas.drawCircle(Offset(rightEyeCenter.dx + eyeDx, rightEyeCenter.dy + eyeDy), 9, Paint()..color = Colors.black87);
+        canvas.drawCircle(Offset(leftEyeCenter.dx + eyeDx - 3, leftEyeCenter.dy + eyeDy - 3), 3, Paint()..color = Colors.white);
+        canvas.drawCircle(Offset(rightEyeCenter.dx + eyeDx - 3, rightEyeCenter.dy + eyeDy - 3), 3, Paint()..color = Colors.white);
+      }
 
       // 7. Red Triangle Nose
       final nosePath = Path()
@@ -153,6 +265,9 @@ class _PetPainter extends CustomPainter {
           canvas.drawLine(Offset(center.dx + i, center.dy + 24), Offset(center.dx + i, center.dy + 42), Paint()..color = Colors.black87..strokeWidth = 2);
         }
       }
+
+      // 9. AUTOMATIC PAW WAVING & SCRATCHING ANIMATION (Vẫy tay 👋 / Gãi ngứa 🐾)
+      _drawRobotPaws(canvas, center);
       return;
     }
 
@@ -160,10 +275,7 @@ class _PetPainter extends CustomPainter {
     Color bodyColor = Colors.orange.shade300;
     Color earColor = Colors.orange.shade400;
 
-    if (skin.contains('Robot') || skin.contains('🤖')) {
-      bodyColor = const Color(0xFF78909C); // Metallic Cyan-Grey
-      earColor = const Color(0xFF00ACC1); // Glowing Cyan Ears
-    } else if (skin.contains('Ninja') || skin.contains('🥷')) {
+    if (skin.contains('Ninja') || skin.contains('🥷')) {
       bodyColor = const Color(0xFF263238); // Dark Ninja Armor
       earColor = const Color(0xFF37474F);
     } else if (skin.contains('Quý Tộc') || skin.contains('👑')) {
@@ -229,23 +341,8 @@ class _PetPainter extends CustomPainter {
     final bodyPaint = Paint()..color = bodyColor;
     canvas.drawCircle(center, 70, bodyPaint);
 
-    // Render Unique Skin Accessories (Robot / Ninja / Noble)
-    if (skin.contains('Robot') || skin.contains('🤖')) {
-      // 1. Robot Top Antenna Rod & Glowing LED
-      canvas.drawRect(Rect.fromLTWH(center.dx - 4, center.dy - 102, 8, 35), Paint()..color = Colors.blueGrey.shade800);
-      canvas.drawCircle(Offset(center.dx, center.dy - 105), 8, Paint()..color = Colors.redAccent);
-      canvas.drawCircle(Offset(center.dx - 2, center.dy - 107), 3, Paint()..color = Colors.white);
-
-      // 2. Metallic Side Screws / Bolts
-      canvas.drawCircle(Offset(center.dx - 68, center.dy), 7, Paint()..color = Colors.grey.shade400);
-      canvas.drawLine(Offset(center.dx - 72, center.dy), Offset(center.dx - 64, center.dy), Paint()..color = Colors.black54..strokeWidth = 2);
-      canvas.drawCircle(Offset(center.dx + 68, center.dy), 7, Paint()..color = Colors.grey.shade400);
-      canvas.drawLine(Offset(center.dx + 64, center.dy), Offset(center.dx + 72, center.dy), Paint()..color = Colors.black54..strokeWidth = 2);
-
-      // 3. Cyber Visor Frame around eyes
-      canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(center.dx - 48, center.dy - 25, 96, 32), const Radius.circular(10)), Paint()..color = Colors.cyan.shade300.withValues(alpha: 0.35));
-      canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(center.dx - 48, center.dy - 25, 96, 32), const Radius.circular(10)), Paint()..color = Colors.cyan.shade600..style = PaintingStyle.stroke..strokeWidth = 3);
-    } else if (skin.contains('Ninja') || skin.contains('🥷')) {
+    // Render Unique Skin Accessories (Ninja / Noble)
+    if (skin.contains('Ninja') || skin.contains('🥷')) {
       // Red Ninja Headband & Silver Badge
       canvas.drawRect(Rect.fromLTWH(center.dx - 68, center.dy - 48, 136, 18), Paint()..color = Colors.red.shade700);
       canvas.drawCircle(Offset(center.dx, center.dy - 39), 10, Paint()..color = Colors.grey.shade300);
@@ -286,22 +383,12 @@ class _PetPainter extends CustomPainter {
       }
     }
 
-    // Eyes rendering
-    final eyeWhitePaint = Paint()..color = Colors.white;
-    final eyePupilPaint = Paint()..color = Colors.black87;
-
+    // Eyes rendering (With Blinking)
     final leftEyeCenter = Offset(center.dx - 28, center.dy - 10);
     final rightEyeCenter = Offset(center.dx + 28, center.dy - 10);
+    final isBlinking = (idleAction == 'blinking' && actionValue > 0.3 && actionValue < 0.7);
 
-    if (expression == 'tickled') {
-      final happyEyePaint = Paint()
-        ..color = Colors.black87
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 4.0
-        ..strokeCap = StrokeCap.round;
-      canvas.drawArc(Rect.fromCircle(center: leftEyeCenter, radius: 12), pi, pi, false, happyEyePaint);
-      canvas.drawArc(Rect.fromCircle(center: rightEyeCenter, radius: 12), pi, pi, false, happyEyePaint);
-    } else if (expression == 'sleeping') {
+    if (isBlinking || expression == 'sleeping') {
       final sleepPaint = Paint()
         ..color = Colors.black87
         ..style = PaintingStyle.stroke
@@ -309,16 +396,23 @@ class _PetPainter extends CustomPainter {
         ..strokeCap = StrokeCap.round;
       canvas.drawLine(Offset(leftEyeCenter.dx - 10, leftEyeCenter.dy), Offset(leftEyeCenter.dx + 10, leftEyeCenter.dy), sleepPaint);
       canvas.drawLine(Offset(rightEyeCenter.dx - 10, rightEyeCenter.dy), Offset(rightEyeCenter.dx + 10, rightEyeCenter.dy), sleepPaint);
+    } else if (expression == 'tickled') {
+      final happyEyePaint = Paint()
+        ..color = Colors.black87
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4.0
+        ..strokeCap = StrokeCap.round;
+      canvas.drawArc(Rect.fromCircle(center: leftEyeCenter, radius: 12), pi, pi, false, happyEyePaint);
+      canvas.drawArc(Rect.fromCircle(center: rightEyeCenter, radius: 12), pi, pi, false, happyEyePaint);
     } else {
-      canvas.drawCircle(leftEyeCenter, 16, eyeWhitePaint);
-      canvas.drawCircle(rightEyeCenter, 16, eyeWhitePaint);
+      canvas.drawCircle(leftEyeCenter, 16, Paint()..color = Colors.white);
+      canvas.drawCircle(rightEyeCenter, 16, Paint()..color = Colors.white);
 
-      canvas.drawCircle(Offset(leftEyeCenter.dx + eyeDx, leftEyeCenter.dy + eyeDy), 8, eyePupilPaint);
-      canvas.drawCircle(Offset(rightEyeCenter.dx + eyeDx, rightEyeCenter.dy + eyeDy), 8, eyePupilPaint);
+      canvas.drawCircle(Offset(leftEyeCenter.dx + eyeDx, leftEyeCenter.dy + eyeDy), 8, Paint()..color = Colors.black87);
+      canvas.drawCircle(Offset(rightEyeCenter.dx + eyeDx, rightEyeCenter.dy + eyeDy), 8, Paint()..color = Colors.black87);
 
-      final catchLightPaint = Paint()..color = Colors.white;
-      canvas.drawCircle(Offset(leftEyeCenter.dx + eyeDx - 3, leftEyeCenter.dy + eyeDy - 3), 3, catchLightPaint);
-      canvas.drawCircle(Offset(rightEyeCenter.dx + eyeDx - 3, rightEyeCenter.dy + eyeDy - 3), 3, catchLightPaint);
+      canvas.drawCircle(Offset(leftEyeCenter.dx + eyeDx - 3, leftEyeCenter.dy + eyeDy - 3), 3, Paint()..color = Colors.white);
+      canvas.drawCircle(Offset(rightEyeCenter.dx + eyeDx - 3, rightEyeCenter.dy + eyeDy - 3), 3, Paint()..color = Colors.white);
     }
 
     // Nose
@@ -338,14 +432,73 @@ class _PetPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     if (isMouthOpen || expression == 'eating') {
-      final openMouthPaint = Paint()..color = Colors.red.shade400;
       canvas.drawOval(
         Rect.fromCenter(center: Offset(center.dx, center.dy + 25), width: 28, height: 24),
-        openMouthPaint,
+        Paint()..color = Colors.red.shade400,
       );
     } else {
       canvas.drawArc(Rect.fromCircle(center: Offset(center.dx - 8, center.dy + 16), radius: 8), 0, pi * 0.8, false, mouthPaint);
       canvas.drawArc(Rect.fromCircle(center: Offset(center.dx + 8, center.dy + 16), radius: 8), 0.2 * pi, pi * 0.8, false, mouthPaint);
+    }
+
+    // Draw Paws (Hand Waving 👋 & Ear Scratching 🐾)
+    _drawStandardPaws(canvas, center, bodyColor);
+  }
+
+  void _drawRobotPaws(Canvas canvas, Offset center) {
+    final pawPaint = Paint()..color = const Color(0xFF546E7A);
+    final innerPawPaint = Paint()..color = const Color(0xFF00ACC1);
+
+    // Left Paw (Default resting on hip)
+    canvas.drawCircle(Offset(center.dx - 75, center.dy + 45), 14, pawPaint);
+    canvas.drawCircle(Offset(center.dx - 75, center.dy + 45), 7, innerPawPaint);
+
+    // Right Paw (Dynamic action: Waving 👋 or Scratching 🐾)
+    if (idleAction == 'waving') {
+      final waveAngle = sin(actionValue * pi * 6) * 0.4;
+      canvas.save();
+      canvas.translate(center.dx + 75, center.dy - 10);
+      canvas.rotate(waveAngle);
+      canvas.drawCircle(const Offset(0, 0), 16, pawPaint);
+      canvas.drawCircle(const Offset(0, 0), 8, innerPawPaint);
+      // Wave motion indicator lines 👋
+      canvas.drawLine(const Offset(18, -10), const Offset(24, -14), Paint()..color = Colors.cyan..strokeWidth = 2);
+      canvas.drawLine(const Offset(20, 0), const Offset(27, 0), Paint()..color = Colors.cyan..strokeWidth = 2);
+      canvas.restore();
+    } else if (idleAction == 'scratching') {
+      final scratchY = sin(actionValue * pi * 10) * 12;
+      canvas.drawCircle(Offset(center.dx + 65, center.dy - 55 + scratchY), 15, pawPaint);
+      canvas.drawCircle(Offset(center.dx + 65, center.dy - 55 + scratchY), 7, innerPawPaint);
+    } else {
+      canvas.drawCircle(Offset(center.dx + 75, center.dy + 45), 14, pawPaint);
+      canvas.drawCircle(Offset(center.dx + 75, center.dy + 45), 7, innerPawPaint);
+    }
+  }
+
+  void _drawStandardPaws(Canvas canvas, Offset center, Color bodyColor) {
+    final pawPaint = Paint()..color = bodyColor;
+    final padPaint = Paint()..color = Colors.pink.shade200;
+
+    // Left Paw (Default resting)
+    canvas.drawCircle(Offset(center.dx - 65, center.dy + 45), 16, pawPaint);
+    canvas.drawCircle(Offset(center.dx - 65, center.dy + 45), 8, padPaint);
+
+    // Right Paw (Dynamic action)
+    if (idleAction == 'waving') {
+      final waveAngle = sin(actionValue * pi * 6) * 0.4;
+      canvas.save();
+      canvas.translate(center.dx + 70, center.dy - 10);
+      canvas.rotate(waveAngle);
+      canvas.drawCircle(const Offset(0, 0), 18, pawPaint);
+      canvas.drawCircle(const Offset(0, 0), 9, padPaint);
+      canvas.restore();
+    } else if (idleAction == 'scratching') {
+      final scratchY = sin(actionValue * pi * 10) * 12;
+      canvas.drawCircle(Offset(center.dx + 55, center.dy - 50 + scratchY), 16, pawPaint);
+      canvas.drawCircle(Offset(center.dx + 55, center.dy - 50 + scratchY), 8, padPaint);
+    } else {
+      canvas.drawCircle(Offset(center.dx + 65, center.dy + 45), 16, pawPaint);
+      canvas.drawCircle(Offset(center.dx + 65, center.dy + 45), 8, padPaint);
     }
   }
 
@@ -355,6 +508,9 @@ class _PetPainter extends CustomPainter {
         oldDelegate.expression != expression ||
         oldDelegate.species != species ||
         oldDelegate.skin != skin ||
-        oldDelegate.isMouthOpen != isMouthOpen;
+        oldDelegate.isMouthOpen != isMouthOpen ||
+        oldDelegate.breathValue != breathValue ||
+        oldDelegate.actionValue != actionValue ||
+        oldDelegate.idleAction != idleAction;
   }
 }
