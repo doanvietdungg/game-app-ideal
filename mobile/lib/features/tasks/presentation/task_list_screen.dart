@@ -65,15 +65,22 @@ class _TaskListScreenState extends State<TaskListScreen> with SingleTickerProvid
   }
 
   Future<void> _loadTasksFromBackend() async {
-    final repo = TaskRepository(ApiClient());
-    final liveTasks = await repo.getTodayTasks(1);
-    if (mounted && liveTasks.isNotEmpty) {
-      setState(() {
-        _tasks = liveTasks;
-        _isLoading = false;
-      });
-    } else if (mounted) {
-      setState(() => _isLoading = false);
+    try {
+      final repo = TaskRepository(ApiClient());
+      final liveTasks = await repo.getTodayTasks(1).timeout(const Duration(milliseconds: 100));
+      if (mounted) {
+        setState(() {
+          _tasks = liveTasks.isNotEmpty ? liveTasks : _mockTasks;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _tasks = _mockTasks;
+          _isLoading = false;
+        });
+      }
     }
   }
 

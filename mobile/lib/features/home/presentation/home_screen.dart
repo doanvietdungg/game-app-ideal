@@ -118,10 +118,10 @@ class _HomeTabContentState extends State<_HomeTabContent> {
   Future<void> _loadTodayTasks() async {
     try {
       final repository = TaskRepository(ApiClient());
-      final tasks = await repository.getTodayTasks(1).timeout(const Duration(milliseconds: 200));
+      final tasks = await repository.getTodayTasks(1).timeout(const Duration(seconds: 3));
       if (mounted) {
         setState(() {
-          _todayTasks = tasks.isNotEmpty ? tasks : _fallbackTasks;
+          _todayTasks = tasks;
           _isLoading = false;
         });
       }
