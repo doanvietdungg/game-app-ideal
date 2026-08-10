@@ -44,7 +44,12 @@ class MobileProfileController extends Controller
 
     public function todayTasks(int $id): JsonResponse
     {
+        $child = DB::table('children')->where('id', $id)->first();
+        $familyId = $child ? $child->family_id : 1;
+
         $tasks = DB::table('tasks')
+            ->where('is_template', false)
+            ->where('family_id', $familyId)
             ->where(function ($q) use ($id) {
                 $q->where('child_id', $id)->orWhereNull('child_id');
             })
