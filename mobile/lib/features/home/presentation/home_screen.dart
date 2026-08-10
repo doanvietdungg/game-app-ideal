@@ -108,11 +108,27 @@ class _HomeTabContentState extends State<_HomeTabContent> {
 
   List<Map<String, dynamic>> _todayTasks = [];
   bool _isLoading = true;
+  String _petActiveSkin = 'Mèo Thường 🐱';
 
   @override
   void initState() {
     super.initState();
     _loadTodayTasks();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final res = await ApiClient().get('/v1/children/1/profile').timeout(const Duration(milliseconds: 500));
+      if (mounted && res.statusCode == 200 && res.data['status'] == true) {
+        final data = res.data['data'];
+        if (data['pet'] != null && data['pet']['active_skin'] != null) {
+          setState(() {
+            _petActiveSkin = data['pet']['active_skin'].toString();
+          });
+        }
+      }
+    } catch (_) {}
   }
 
   Future<void> _loadTodayTasks() async {
@@ -243,8 +259,29 @@ class _HomeTabContentState extends State<_HomeTabContent> {
   }
 
   Widget _buildPetCanvas(BuildContext context) {
+    String petEmoji = '🐱';
+    String petSkinTitle = 'Mimi đang vui vẻ 😊';
+    Color petCircleColor = AppTheme.primary.withValues(alpha: 0.08);
+
+    if (_petActiveSkin.contains('Robot') || _petActiveSkin.contains('🤖')) {
+      petEmoji = '🤖🐱';
+      petSkinTitle = 'Mimi Mèo Robot 🤖';
+      petCircleColor = Colors.cyan.withValues(alpha: 0.15);
+    } else if (_petActiveSkin.contains('Ninja') || _petActiveSkin.contains('🥷')) {
+      petEmoji = '🥷🐱';
+      petSkinTitle = 'Mimi Mèo Ninja 🥷';
+      petCircleColor = Colors.grey.withValues(alpha: 0.2);
+    } else if (_petActiveSkin.contains('Quý Tộc') || _petActiveSkin.contains('👑')) {
+      petEmoji = '👑🐱';
+      petSkinTitle = 'Mimi Mèo Quý Tộc 👑';
+      petCircleColor = Colors.amber.withValues(alpha: 0.2);
+    }
+
     return GestureDetector(
-      onTap: () => context.push('/pet'),
+      onTap: () async {
+        await context.push('/pet');
+        _loadProfile();
+      },
       child: Container(
         height: 220,
         decoration: BoxDecoration(
@@ -267,22 +304,22 @@ class _HomeTabContentState extends State<_HomeTabContent> {
                 width: 160,
                 height: 160,
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.08),
+                  color: petCircleColor,
                   shape: BoxShape.circle,
                 ),
               ),
             ),
-            const Column(
+            Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  '🐱',
-                  style: TextStyle(fontSize: 80),
+                  petEmoji,
+                  style: const TextStyle(fontSize: 70),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Text(
-                  'Mimi đang vui vẻ 😊',
-                  style: TextStyle(
+                  petSkinTitle,
+                  style: const TextStyle(
                     color: AppTheme.text,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,

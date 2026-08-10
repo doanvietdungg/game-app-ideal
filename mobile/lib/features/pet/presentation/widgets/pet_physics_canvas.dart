@@ -5,6 +5,7 @@ class PetPhysicsCanvas extends StatelessWidget {
   final Offset? touchOffset;
   final String expression; // 'happy', 'eating', 'tickled', 'sleeping'
   final String species; // 'cat', 'dog', 'dragon', 'rabbit'
+  final String skin; // 'Mèo Thường 🐱', 'Mèo Robot 🤖', 'Mèo Ninja 🥷', 'Mèo Quý Tộc 👑'
   final double scaleX;
   final double scaleY;
   final bool isMouthOpen;
@@ -14,6 +15,7 @@ class PetPhysicsCanvas extends StatelessWidget {
     this.touchOffset,
     this.expression = 'happy',
     this.species = 'cat',
+    this.skin = 'Mèo Thường 🐱',
     this.scaleX = 1.0,
     this.scaleY = 1.0,
     this.isMouthOpen = false,
@@ -30,6 +32,7 @@ class PetPhysicsCanvas extends StatelessWidget {
           touchOffset: touchOffset,
           expression: expression,
           species: species,
+          skin: skin,
           isMouthOpen: isMouthOpen,
         ),
       ),
@@ -41,9 +44,16 @@ class _PetPainter extends CustomPainter {
   final Offset? touchOffset;
   final String expression;
   final String species;
+  final String skin;
   final bool isMouthOpen;
 
-  _PetPainter({this.touchOffset, required this.expression, required this.species, required this.isMouthOpen});
+  _PetPainter({
+    this.touchOffset,
+    required this.expression,
+    required this.species,
+    required this.skin,
+    required this.isMouthOpen,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -56,11 +66,20 @@ class _PetPainter extends CustomPainter {
       shadowPaint,
     );
 
-    // Color palette based on species
+    // Color palette based on species & equipped skin
     Color bodyColor = Colors.orange.shade300;
     Color earColor = Colors.orange.shade400;
 
-    if (species == 'dog') {
+    if (skin.contains('Robot') || skin.contains('🤖')) {
+      bodyColor = const Color(0xFF78909C); // Metallic Cyan-Grey
+      earColor = const Color(0xFF00ACC1); // Glowing Cyan Ears
+    } else if (skin.contains('Ninja') || skin.contains('🥷')) {
+      bodyColor = const Color(0xFF263238); // Dark Ninja Armor
+      earColor = const Color(0xFF37474F);
+    } else if (skin.contains('Quý Tộc') || skin.contains('👑')) {
+      bodyColor = const Color(0xFFFFD54F); // Imperial Gold Fur
+      earColor = const Color(0xFFFFB300);
+    } else if (species == 'dog') {
       bodyColor = Colors.amber.shade600;
       earColor = Colors.brown.shade400;
     } else if (species == 'dragon') {
@@ -207,6 +226,7 @@ class _PetPainter extends CustomPainter {
     return oldDelegate.touchOffset != touchOffset ||
         oldDelegate.expression != expression ||
         oldDelegate.species != species ||
+        oldDelegate.skin != skin ||
         oldDelegate.isMouthOpen != isMouthOpen;
   }
 }

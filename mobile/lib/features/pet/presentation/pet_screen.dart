@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/api/api_client.dart';
 import '../../../core/theme/app_theme.dart';
 import 'widgets/pet_physics_canvas.dart';
 import 'widgets/particle_overlay.dart';
@@ -19,6 +20,7 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
   double _happiness = 0.8;
   String _statusMessage = 'Mimi đang vui vẻ 😊';
   String _expression = 'happy';
+  String _activeSkin = 'Mèo Thường 🐱';
 
   Offset? _touchOffset;
   bool _isMouthOpen = false;
@@ -28,6 +30,34 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
 
   double _scaleX = 1.0;
   double _scaleY = 1.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final res = await ApiClient().get('/v1/children/1/profile').timeout(const Duration(milliseconds: 500));
+      if (mounted && res.statusCode == 200 && res.data['status'] == true) {
+        final data = res.data['data'];
+        setState(() {
+          _stars = data['available_stars'] ?? _stars;
+          if (data['pet'] != null && data['pet']['active_skin'] != null) {
+            _activeSkin = data['pet']['active_skin'].toString();
+            if (_activeSkin.contains('Robot') || _activeSkin.contains('🤖')) {
+              _statusMessage = 'Mimi Mèo Robot đang sẵn sàng! 🤖';
+            } else if (_activeSkin.contains('Ninja') || _activeSkin.contains('🥷')) {
+              _statusMessage = 'Mimi Mèo Ninja đang tuần tra! 🥷';
+            } else if (_activeSkin.contains('Quý Tộc') || _activeSkin.contains('👑')) {
+              _statusMessage = 'Mimi Mèo Quý Tộc kiêu hãnh! 👑';
+            }
+          }
+        });
+      }
+    } catch (_) {}
+  }
 
   void _triggerBounce() {
     setState(() {
@@ -212,6 +242,7 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
                     child: PetPhysicsCanvas(
                       touchOffset: _touchOffset,
                       expression: _expression,
+                      skin: _activeSkin,
                       scaleX: _scaleX,
                       scaleY: _scaleY,
                       isMouthOpen: _isMouthOpen,
