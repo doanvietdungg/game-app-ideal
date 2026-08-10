@@ -264,15 +264,15 @@ class _HomeTabContentState extends State<_HomeTabContent> {
     Color petCircleColor = AppTheme.primary.withValues(alpha: 0.08);
 
     if (_petActiveSkin.contains('Robot') || _petActiveSkin.contains('🤖')) {
-      petEmoji = '🤖🐱';
+      petEmoji = '🤖';
       petSkinTitle = 'Mimi Mèo Robot 🤖';
       petCircleColor = Colors.cyan.withValues(alpha: 0.15);
     } else if (_petActiveSkin.contains('Ninja') || _petActiveSkin.contains('🥷')) {
-      petEmoji = '🥷🐱';
+      petEmoji = '🥷';
       petSkinTitle = 'Mimi Mèo Ninja 🥷';
       petCircleColor = Colors.grey.withValues(alpha: 0.2);
     } else if (_petActiveSkin.contains('Quý Tộc') || _petActiveSkin.contains('👑')) {
-      petEmoji = '👑🐱';
+      petEmoji = '👑';
       petSkinTitle = 'Mimi Mèo Quý Tộc 👑';
       petCircleColor = Colors.amber.withValues(alpha: 0.2);
     }

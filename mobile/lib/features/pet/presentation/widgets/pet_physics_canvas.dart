@@ -139,6 +139,44 @@ class _PetPainter extends CustomPainter {
     final bodyPaint = Paint()..color = bodyColor;
     canvas.drawCircle(center, 70, bodyPaint);
 
+    // Render Unique Skin Accessories (Robot / Ninja / Noble)
+    if (skin.contains('Robot') || skin.contains('🤖')) {
+      // 1. Robot Top Antenna Rod & Glowing LED
+      canvas.drawRect(Rect.fromLTWH(center.dx - 4, center.dy - 102, 8, 35), Paint()..color = Colors.blueGrey.shade800);
+      canvas.drawCircle(Offset(center.dx, center.dy - 105), 8, Paint()..color = Colors.redAccent);
+      canvas.drawCircle(Offset(center.dx - 2, center.dy - 107), 3, Paint()..color = Colors.white);
+
+      // 2. Metallic Side Screws / Bolts
+      canvas.drawCircle(Offset(center.dx - 68, center.dy), 7, Paint()..color = Colors.grey.shade400);
+      canvas.drawLine(Offset(center.dx - 72, center.dy), Offset(center.dx - 64, center.dy), Paint()..color = Colors.black54..strokeWidth = 2);
+      canvas.drawCircle(Offset(center.dx + 68, center.dy), 7, Paint()..color = Colors.grey.shade400);
+      canvas.drawLine(Offset(center.dx + 64, center.dy), Offset(center.dx + 72, center.dy), Paint()..color = Colors.black54..strokeWidth = 2);
+
+      // 3. Cyber Visor Frame around eyes
+      canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(center.dx - 48, center.dy - 25, 96, 32), const Radius.circular(10)), Paint()..color = Colors.cyan.shade300.withValues(alpha: 0.35));
+      canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(center.dx - 48, center.dy - 25, 96, 32), const Radius.circular(10)), Paint()..color = Colors.cyan.shade600..style = PaintingStyle.stroke..strokeWidth = 3);
+    } else if (skin.contains('Ninja') || skin.contains('🥷')) {
+      // Red Ninja Headband & Silver Badge
+      canvas.drawRect(Rect.fromLTWH(center.dx - 68, center.dy - 48, 136, 18), Paint()..color = Colors.red.shade700);
+      canvas.drawCircle(Offset(center.dx, center.dy - 39), 10, Paint()..color = Colors.grey.shade300);
+      canvas.drawCircle(Offset(center.dx, center.dy - 39), 4, Paint()..color = Colors.black);
+    } else if (skin.contains('Quý Tộc') || skin.contains('👑')) {
+      // Golden Royal Crown
+      final crownPath = Path()
+        ..moveTo(center.dx - 35, center.dy - 65)
+        ..lineTo(center.dx - 40, center.dy - 100)
+        ..lineTo(center.dx - 18, center.dy - 82)
+        ..lineTo(center.dx, center.dy - 108)
+        ..lineTo(center.dx + 18, center.dy - 82)
+        ..lineTo(center.dx + 40, center.dy - 100)
+        ..lineTo(center.dx + 35, center.dy - 65)
+        ..close();
+      canvas.drawPath(crownPath, Paint()..color = Colors.amber.shade500);
+      canvas.drawCircle(Offset(center.dx - 40, center.dy - 100), 5, Paint()..color = Colors.redAccent);
+      canvas.drawCircle(Offset(center.dx, center.dy - 108), 6, Paint()..color = Colors.blueAccent);
+      canvas.drawCircle(Offset(center.dx + 40, center.dy - 100), 5, Paint()..color = Colors.redAccent);
+    }
+
     // Cheeks
     final cheekPaint = Paint()..color = Colors.pink.shade300.withValues(alpha: 0.5);
     canvas.drawCircle(Offset(center.dx - 45, center.dy + 15), 14, cheekPaint);
