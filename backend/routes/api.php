@@ -26,6 +26,7 @@ Route::prefix('v1')->group(function () {
     // Mobile Profile & Tasks public endpoints for mobile app
     Route::get('children/{id}/profile', [MobileProfileController::class, 'profile']);
     Route::get('children/{id}/tasks/today', [MobileProfileController::class, 'todayTasks']);
+    Route::post('children/{id}/pet/skin', [MobileProfileController::class, 'changeOrUnlockSkin']);
 
     // Mobile Rewards public endpoints
     Route::get('rewards', [RewardController::class, 'index']);

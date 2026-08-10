@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/api/api_client.dart';
 import '../../../core/theme/app_theme.dart';
 
 class StoreScreen extends StatefulWidget {
-  const StoreScreen({super.key});
+  final ApiClient? apiClient;
+  const StoreScreen({super.key, this.apiClient});
 
   @override
   State<StoreScreen> createState() => _StoreScreenState();
@@ -11,11 +13,11 @@ class StoreScreen extends StatefulWidget {
 
 class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  int _stars = 45;
-  String _equippedSkin = 'Mèo Thường 🐱';
-
-  // List of unlocked skin names
-  final List<String> _unlockedSkins = ['Mèo Thường 🐱'];
+  
+  // Persistent static state across app sessions
+  static int _stars = 45;
+  static String _equippedSkin = 'Mèo Thường 🐱';
+  static final Set<String> _unlockedSkins = {'Mèo Thường 🐱'};
 
   final List<Map<String, dynamic>> _storeSkins = [
     {'name': 'Mèo Robot 🤖', 'cost': 15, 'desc': 'Trang bị vỏ kim loại bóng loáng siêu ngầu.'},
@@ -35,7 +37,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     super.dispose();
   }
 
-  void _unlockSkin(Map<String, dynamic> skin) {
+  Future<void> _unlockSkin(Map<String, dynamic> skin) async {
     final cost = skin['cost'] as int;
     final name = skin['name'] as String;
 
@@ -43,13 +45,69 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
       setState(() {
         _stars -= cost;
         _unlockedSkins.add(name);
+        _equippedSkin = name; // Auto equip on unlock!
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('🎉 Chúc mừng con đã mở khóa thành công $name!'),
-          backgroundColor: AppTheme.secondary,
-        ),
-      );
+
+      // Sync unlock to Backend Database API if apiClient provided
+      if (widget.apiClient != null) {
+        widget.apiClient!.post('/v1/children/1/pet/skin', data: {
+          'skin_name': name,
+          'price': cost,
+        }).catchError((_) {});
+      }
+
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade100,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(name.split(' ').last, style: const TextStyle(fontSize: 45)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    '🎉 Mở Khóa Thành Công!',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppTheme.text),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Con vừa sở hữu diện mạo "$name"!\nMimi đã được thay trang phục mới siêu ngầu 🐱✨',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 14, color: AppTheme.textLight, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: const Text('Đeo ngay cực thích! 🚀', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -206,11 +264,12 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
 
   Widget _buildWardrobeTab() {
     // List unlocked skins
+    final unlockedList = _unlockedSkins.toList();
     return ListView.builder(
       padding: const EdgeInsets.all(20),
-      itemCount: _unlockedSkins.length,
+      itemCount: unlockedList.length,
       itemBuilder: (context, index) {
-        final name = _unlockedSkins[index];
+        final name = unlockedList[index];
         final isEquipped = _equippedSkin == name;
 
         return Card(
