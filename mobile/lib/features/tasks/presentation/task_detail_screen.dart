@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/api/api_client.dart';
 import '../../../core/theme/app_theme.dart';
+import '../data/task_repository.dart';
 
 class TaskDetailScreen extends StatefulWidget {
   final int taskId;
@@ -57,20 +59,26 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     }
   }
 
-  void _handleSubmit() {
+  Future<void> _handleSubmit() async {
     setState(() {
       _isSubmitting = true;
     });
 
-    // Simulate upload and complete
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
+    // Call live Backend API to submit task log
+    final repository = TaskRepository(ApiClient());
+    await repository.submitTask(
+      widget.taskId,
+      1, // Bé Nam (ID: 1)
+      filePath: _selectedImage?.path,
+    );
 
-        // Show congratulations and go back
-        showDialog(
+    if (mounted) {
+      setState(() {
+        _isSubmitting = false;
+      });
+
+      // Show congratulations and go back
+      showDialog(
           context: context,
           barrierDismissible: false,
           builder: (context) => Dialog(
@@ -180,7 +188,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           ),
         );
       }
-    });
   }
 
   void _showPinDialog() {

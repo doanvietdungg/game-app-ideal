@@ -11,7 +11,7 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $familyId = $request->user()->family_id;
+        $familyId = $request->user()?->family_id ?? 1;
         $children = ChildModel::where('family_id', $familyId)->with('pet')->get();
 
         $todayLogs = TaskLogModel::whereHas('child', fn($q) => $q->where('family_id', $familyId))

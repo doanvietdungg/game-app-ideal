@@ -15,7 +15,8 @@ class PendingWebController extends Controller
 
     public function index(Request $request)
     {
-        $logs = TaskLogModel::whereHas('child', fn($q) => $q->where('family_id', $request->user()->family_id))
+        $familyId = $request->user()?->family_id ?? 1;
+        $logs = TaskLogModel::whereHas('child', fn($q) => $q->where('family_id', $familyId))
             ->where('status', 'submitted')
             ->with(['task', 'child'])
             ->latest('submitted_at')

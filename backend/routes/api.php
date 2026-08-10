@@ -19,6 +19,7 @@ Route::prefix('v1')->group(function () {
 
     // Task Logs approval public endpoints (for demo & app approvals)
     Route::get('task-logs/pending', [TaskLogController::class, 'pending']);
+    Route::post('task-logs', [TaskLogController::class, 'submit']);
     Route::post('task-logs/{id}/approve', [TaskLogController::class, 'approve']);
     Route::post('task-logs/{id}/reject', [TaskLogController::class, 'reject']);
 
@@ -44,9 +45,6 @@ Route::prefix('v1')->group(function () {
         Route::get('tasks', [TaskController::class, 'index']);
         Route::post('tasks', [TaskController::class, 'store']);
         Route::delete('tasks/{id}', [TaskController::class, 'destroy']);
-
-        // Task Logs submission
-        Route::post('task-logs', [TaskLogController::class, 'submit']);
 
         // Rewards routes
         Route::get('rewards', [RewardController::class, 'index']);
