@@ -6,6 +6,7 @@ import '../../tasks/data/task_repository.dart';
 import '../../tasks/presentation/task_list_screen.dart';
 import '../../rewards/presentation/reward_list_screen.dart';
 import '../../stats/presentation/stats_screen.dart';
+import '../../pet/presentation/widgets/pet_physics_canvas.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -264,7 +265,12 @@ class _HomeTabContentState extends State<_HomeTabContent> {
     List<Color> cardGradient = [const Color(0xFFFFF9F0), const Color(0xFFFFF3E0)];
     Color accentColor = AppTheme.primary;
     Color circleColor = AppTheme.primary.withValues(alpha: 0.1);
-    Widget petAvatarWidget = const Text('🐱', style: TextStyle(fontSize: 60));
+    Widget petAvatarWidget = PetPhysicsCanvas(
+      skin: _petActiveSkin,
+      expression: 'happy',
+      scaleX: 0.52,
+      scaleY: 0.52,
+    );
 
     if (_petActiveSkin.contains('Robot') || _petActiveSkin.contains('🤖')) {
       petSkinTitle = 'Mimi Mèo Robot';
@@ -272,35 +278,18 @@ class _HomeTabContentState extends State<_HomeTabContent> {
       cardGradient = [const Color(0xFFE0F7FA), const Color(0xFFE1F5FE)];
       accentColor = const Color(0xFF00ACC1);
       circleColor = const Color(0xFF00E5FF).withValues(alpha: 0.2);
-      petAvatarWidget = Stack(
-        alignment: Alignment.center,
-        children: [
-          const Text('🐱', style: TextStyle(fontSize: 52)),
-          Positioned(
-            top: 2,
-            right: 4,
-            child: Container(
-              padding: const EdgeInsets.all(2),
-              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-              child: const Text('⚡', style: TextStyle(fontSize: 14)),
-            ),
-          ),
-        ],
-      );
     } else if (_petActiveSkin.contains('Ninja') || _petActiveSkin.contains('🥷')) {
       petSkinTitle = 'Mimi Mèo Ninja';
       petTag = '🥷 Băng Nhẫn';
       cardGradient = [const Color(0xFFECEFF1), const Color(0xFFCFD8DC)];
       accentColor = const Color(0xFF37474F);
       circleColor = Colors.grey.withValues(alpha: 0.25);
-      petAvatarWidget = const Text('🥷', style: TextStyle(fontSize: 60));
     } else if (_petActiveSkin.contains('Quý Tộc') || _petActiveSkin.contains('👑')) {
       petSkinTitle = 'Mimi Mèo Quý Tộc';
       petTag = '👑 Hoàng Gia';
       cardGradient = [const Color(0xFFFFF8E1), const Color(0xFFFFECB3)];
       accentColor = const Color(0xFFFFB300);
       circleColor = Colors.amber.withValues(alpha: 0.25);
-      petAvatarWidget = const Text('👑', style: TextStyle(fontSize: 60));
     }
 
     return GestureDetector(
