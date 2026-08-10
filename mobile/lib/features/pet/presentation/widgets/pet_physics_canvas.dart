@@ -66,6 +66,96 @@ class _PetPainter extends CustomPainter {
       shadowPaint,
     );
 
+    // ----------------------------------------------------
+    // SPECIAL ROBOT CAT CUSTOM HEAD DRAWING 🤖
+    // ----------------------------------------------------
+    if (skin.contains('Robot') || skin.contains('🤖')) {
+      // 1. Cyber Cat Ears on Top
+      final leftEar = Path()
+        ..moveTo(center.dx - 50, center.dy - 55)
+        ..lineTo(center.dx - 70, center.dy - 100)
+        ..lineTo(center.dx - 20, center.dy - 60)
+        ..close();
+      canvas.drawPath(leftEar, Paint()..color = const Color(0xFF00ACC1));
+      canvas.drawPath(leftEar, Paint()..color = const Color(0xFF006064)..style = PaintingStyle.stroke..strokeWidth = 3);
+
+      final rightEar = Path()
+        ..moveTo(center.dx + 50, center.dy - 55)
+        ..lineTo(center.dx + 70, center.dy - 100)
+        ..lineTo(center.dx + 20, center.dy - 60)
+        ..close();
+      canvas.drawPath(rightEar, Paint()..color = const Color(0xFF00ACC1));
+      canvas.drawPath(rightEar, Paint()..color = const Color(0xFF006064)..style = PaintingStyle.stroke..strokeWidth = 3);
+
+      // 2. Top Antenna Rod & Glowing Red LED (exact 🤖 match)
+      canvas.drawRect(Rect.fromLTWH(center.dx - 4, center.dy - 102, 8, 40), Paint()..color = Colors.blueGrey.shade900);
+      canvas.drawCircle(Offset(center.dx, center.dy - 105), 9, Paint()..color = Colors.redAccent);
+      canvas.drawCircle(Offset(center.dx - 2, center.dy - 107), 3, Paint()..color = Colors.white);
+
+      // 3. Side Red Ear/Speaker Knobs (exact 🤖 match)
+      canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(center.dx - 84, center.dy - 20, 16, 40), const Radius.circular(6)), Paint()..color = Colors.red.shade700);
+      canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(center.dx + 68, center.dy - 20, 16, 40), const Radius.circular(6)), Paint()..color = Colors.red.shade700);
+
+      // 4. Main Square Metallic Box Robot Head
+      final boxRect = Rect.fromCenter(center: center, width: 140, height: 130);
+      final boxRRect = RRect.fromRectAndRadius(boxRect, const Radius.circular(24));
+      canvas.drawRRect(boxRRect, Paint()..color = const Color(0xFF78909C));
+      canvas.drawRRect(boxRRect, Paint()..color = const Color(0xFF37474F)..style = PaintingStyle.stroke..strokeWidth = 4);
+
+      // 5. Metallic Cheek Accents
+      canvas.drawCircle(Offset(center.dx - 48, center.dy + 25), 10, Paint()..color = Colors.cyan.shade300.withValues(alpha: 0.5));
+      canvas.drawCircle(Offset(center.dx + 48, center.dy + 25), 10, Paint()..color = Colors.cyan.shade300.withValues(alpha: 0.5));
+
+      // Eye Gaze Offset Calculation
+      double eyeDx = 0;
+      double eyeDy = 0;
+      if (touchOffset != null) {
+        final deltaX = touchOffset!.dx - center.dx;
+        final deltaY = touchOffset!.dy - center.dy;
+        final distance = sqrt(deltaX * deltaX + deltaY * deltaY);
+        if (distance > 0) {
+          eyeDx = (deltaX / distance) * 6.0;
+          eyeDy = (deltaY / distance) * 6.0;
+        }
+      }
+
+      // 6. Robot Eyes (Large Round White Eye Sockets with Pupils)
+      final leftEyeCenter = Offset(center.dx - 28, center.dy - 12);
+      final rightEyeCenter = Offset(center.dx + 28, center.dy - 12);
+
+      canvas.drawCircle(leftEyeCenter, 18, Paint()..color = Colors.white);
+      canvas.drawCircle(rightEyeCenter, 18, Paint()..color = Colors.white);
+      canvas.drawCircle(leftEyeCenter, 18, Paint()..color = Colors.black87..style = PaintingStyle.stroke..strokeWidth = 3);
+      canvas.drawCircle(rightEyeCenter, 18, Paint()..color = Colors.black87..style = PaintingStyle.stroke..strokeWidth = 3);
+
+      canvas.drawCircle(Offset(leftEyeCenter.dx + eyeDx, leftEyeCenter.dy + eyeDy), 9, Paint()..color = Colors.black87);
+      canvas.drawCircle(Offset(rightEyeCenter.dx + eyeDx, rightEyeCenter.dy + eyeDy), 9, Paint()..color = Colors.black87);
+      canvas.drawCircle(Offset(leftEyeCenter.dx + eyeDx - 3, leftEyeCenter.dy + eyeDy - 3), 3, Paint()..color = Colors.white);
+      canvas.drawCircle(Offset(rightEyeCenter.dx + eyeDx - 3, rightEyeCenter.dy + eyeDy - 3), 3, Paint()..color = Colors.white);
+
+      // 7. Red Triangle Nose
+      final nosePath = Path()
+        ..moveTo(center.dx - 6, center.dy + 8)
+        ..lineTo(center.dx + 6, center.dy + 8)
+        ..lineTo(center.dx, center.dy + 16)
+        ..close();
+      canvas.drawPath(nosePath, Paint()..color = Colors.red.shade600);
+
+      // 8. Metallic Mouth Grill / Teeth (exact 🤖 match)
+      if (isMouthOpen || expression == 'eating') {
+        canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(center.dx - 24, center.dy + 24, 48, 22), const Radius.circular(8)), Paint()..color = Colors.red.shade400);
+      } else {
+        final mouthGrillRect = Rect.fromLTWH(center.dx - 26, center.dy + 24, 52, 18);
+        canvas.drawRRect(RRect.fromRectAndRadius(mouthGrillRect, const Radius.circular(6)), Paint()..color = Colors.grey.shade200);
+        canvas.drawRRect(RRect.fromRectAndRadius(mouthGrillRect, const Radius.circular(6)), Paint()..color = Colors.black87..style = PaintingStyle.stroke..strokeWidth = 2);
+        // Vertical grill lines for robot teeth
+        for (int i = -18; i <= 18; i += 9) {
+          canvas.drawLine(Offset(center.dx + i, center.dy + 24), Offset(center.dx + i, center.dy + 42), Paint()..color = Colors.black87..strokeWidth = 2);
+        }
+      }
+      return;
+    }
+
     // Color palette based on species & equipped skin
     Color bodyColor = Colors.orange.shade300;
     Color earColor = Colors.orange.shade400;
