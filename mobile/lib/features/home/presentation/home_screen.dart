@@ -176,63 +176,69 @@ class _HomeTabContentState extends State<_HomeTabContent> {
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primary.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.emoji_events_rounded, color: AppTheme.primary, size: 16),
-                      SizedBox(width: 4),
-                      Text(
-                        'Hạng Bạc',
-                        style: TextStyle(
-                          color: AppTheme.text,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.emoji_events_rounded, color: AppTheme.primary, size: 14),
+                    SizedBox(width: 4),
+                    Text(
+                      'Hạng Bạc',
+                      style: TextStyle(
+                        color: AppTheme.text,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 6),
+              const FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Xin chào, Nam! 👋',
+                  style: TextStyle(
+                    color: AppTheme.text,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            const Text(
-              'Xin chào, Nam! 👋',
-              style: TextStyle(
-                color: AppTheme.text,
-                fontSize: 24,
-                fontWeight: FontWeight.w900,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+        const SizedBox(width: 8),
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             _buildStatItem('🔥', '12 ngày'),
-            const SizedBox(width: 12),
+            const SizedBox(width: 6),
             _buildStatItem('⭐', '45 Sao'),
           ],
-        )
+        ),
       ],
     );
   }
 
   Widget _buildStatItem(String emoji, String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -243,14 +249,15 @@ class _HomeTabContentState extends State<_HomeTabContent> {
         border: Border.all(color: const Color(0xFFFFF2D6), width: 1.5),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 16)),
-          const SizedBox(width: 6),
+          Text(emoji, style: const TextStyle(fontSize: 12)),
+          const SizedBox(width: 4),
           Text(
             text,
             style: const TextStyle(
               color: AppTheme.text,
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.bold,
             ),
           ),
