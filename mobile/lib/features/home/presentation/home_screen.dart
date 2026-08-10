@@ -273,9 +273,33 @@ class _HomeTabContent extends StatelessWidget {
 
   Widget _buildTodayTasksSection(BuildContext context) {
     final List<Map<String, dynamic>> mockTasks = [
-      {'title': 'Dọn dẹp phòng', 'stars': 5, 'emoji': '🏠', 'color': const Color(0xFFFFB347)},
-      {'title': 'Đọc sách 20 phút', 'stars': 10, 'emoji': '📚', 'color': const Color(0xFF87CEEB)},
-      {'title': 'Rửa chén đĩa', 'stars': 8, 'emoji': '🍽️', 'color': const Color(0xFFA8E6CF)},
+      {
+        'id': 1,
+        'title': 'Dọn dẹp phòng',
+        'stars': 5,
+        'category': 'housework',
+        'emoji': '🏠',
+        'desc': 'Hãy xếp gọn đồ chơi và gấp chăn màn ngăn nắp con nhé!',
+        'color': const Color(0xFFFFB347)
+      },
+      {
+        'id': 2,
+        'title': 'Đọc sách 20 phút',
+        'stars': 10,
+        'category': 'study',
+        'emoji': '📚',
+        'desc': 'Đọc tập trung 20 phút sách truyện con yêu thích.',
+        'color': const Color(0xFF87CEEB)
+      },
+      {
+        'id': 3,
+        'title': 'Rửa chén đĩa',
+        'stars': 8,
+        'category': 'housework',
+        'emoji': '🍽️',
+        'desc': 'Rửa sạch bát đĩa sau bữa ăn cùng bố mẹ nhé!',
+        'color': const Color(0xFFA8E6CF)
+      },
     ];
 
     return Column(
@@ -316,7 +340,10 @@ class _HomeTabContent extends StatelessWidget {
 
   Widget _buildTaskCard(BuildContext context, Map<String, dynamic> task) {
     return GestureDetector(
-      onTap: () => context.push('/tasks'),
+      onTap: () {
+        final taskId = task['id'] ?? 1;
+        context.push('/tasks/$taskId', extra: task);
+      },
       child: Container(
         width: 140,
         margin: const EdgeInsets.only(right: 16),
