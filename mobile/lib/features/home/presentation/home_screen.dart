@@ -259,22 +259,48 @@ class _HomeTabContentState extends State<_HomeTabContent> {
   }
 
   Widget _buildPetCanvas(BuildContext context) {
-    String petEmoji = '🐱';
-    String petSkinTitle = 'Mimi đang vui vẻ 😊';
-    Color petCircleColor = AppTheme.primary.withValues(alpha: 0.08);
+    String petSkinTitle = 'Mimi';
+    String petTag = '😊 Vui vẻ';
+    List<Color> cardGradient = [const Color(0xFFFFF9F0), const Color(0xFFFFF3E0)];
+    Color accentColor = AppTheme.primary;
+    Color circleColor = AppTheme.primary.withValues(alpha: 0.1);
+    Widget petAvatarWidget = const Text('🐱', style: TextStyle(fontSize: 60));
 
     if (_petActiveSkin.contains('Robot') || _petActiveSkin.contains('🤖')) {
-      petEmoji = '🤖';
-      petSkinTitle = 'Mimi Mèo Robot 🤖';
-      petCircleColor = Colors.cyan.withValues(alpha: 0.15);
+      petSkinTitle = 'Mimi Mèo Robot';
+      petTag = '⚡ Cyber Armor';
+      cardGradient = [const Color(0xFFE0F7FA), const Color(0xFFE1F5FE)];
+      accentColor = const Color(0xFF00ACC1);
+      circleColor = const Color(0xFF00E5FF).withValues(alpha: 0.2);
+      petAvatarWidget = Stack(
+        alignment: Alignment.center,
+        children: [
+          const Text('🐱', style: TextStyle(fontSize: 52)),
+          Positioned(
+            top: 2,
+            right: 4,
+            child: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+              child: const Text('⚡', style: TextStyle(fontSize: 14)),
+            ),
+          ),
+        ],
+      );
     } else if (_petActiveSkin.contains('Ninja') || _petActiveSkin.contains('🥷')) {
-      petEmoji = '🥷';
-      petSkinTitle = 'Mimi Mèo Ninja 🥷';
-      petCircleColor = Colors.grey.withValues(alpha: 0.2);
+      petSkinTitle = 'Mimi Mèo Ninja';
+      petTag = '🥷 Băng Nhẫn';
+      cardGradient = [const Color(0xFFECEFF1), const Color(0xFFCFD8DC)];
+      accentColor = const Color(0xFF37474F);
+      circleColor = Colors.grey.withValues(alpha: 0.25);
+      petAvatarWidget = const Text('🥷', style: TextStyle(fontSize: 60));
     } else if (_petActiveSkin.contains('Quý Tộc') || _petActiveSkin.contains('👑')) {
-      petEmoji = '👑';
-      petSkinTitle = 'Mimi Mèo Quý Tộc 👑';
-      petCircleColor = Colors.amber.withValues(alpha: 0.2);
+      petSkinTitle = 'Mimi Mèo Quý Tộc';
+      petTag = '👑 Hoàng Gia';
+      cardGradient = [const Color(0xFFFFF8E1), const Color(0xFFFFECB3)];
+      accentColor = const Color(0xFFFFB300);
+      circleColor = Colors.amber.withValues(alpha: 0.25);
+      petAvatarWidget = const Text('👑', style: TextStyle(fontSize: 60));
     }
 
     return GestureDetector(
@@ -285,47 +311,74 @@ class _HomeTabContentState extends State<_HomeTabContent> {
       child: Container(
         height: 220,
         decoration: BoxDecoration(
-          color: Colors.white,
+          gradient: LinearGradient(
+            colors: cardGradient,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(32),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 15,
-              offset: const Offset(0, 6),
+              color: accentColor.withValues(alpha: 0.12),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
             ),
           ],
-          border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2), width: 2),
+          border: Border.all(color: accentColor.withValues(alpha: 0.3), width: 1.5),
         ),
         child: Stack(
           alignment: Alignment.center,
           children: [
             Positioned(
+              top: 18,
               child: Container(
-                width: 160,
-                height: 160,
+                width: 110,
+                height: 110,
                 decoration: BoxDecoration(
-                  color: petCircleColor,
+                  color: circleColor,
                   shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: accentColor.withValues(alpha: 0.15),
+                      blurRadius: 12,
+                    )
+                  ],
                 ),
+                child: Center(child: petAvatarWidget),
               ),
             ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  petEmoji,
-                  style: const TextStyle(fontSize: 70),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  petSkinTitle,
-                  style: const TextStyle(
-                    color: AppTheme.text,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
+            Positioned(
+              top: 134,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    petSkinTitle,
+                    style: const TextStyle(
+                      color: AppTheme.text,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: accentColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      petTag,
+                      style: TextStyle(
+                        color: accentColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             Positioned(
               bottom: 16,
@@ -334,10 +387,10 @@ class _HomeTabContentState extends State<_HomeTabContent> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         'Cấp 1: Baby',
                         style: TextStyle(
                           color: AppTheme.textLight,
@@ -348,7 +401,7 @@ class _HomeTabContentState extends State<_HomeTabContent> {
                       Text(
                         '45/100 ⭐',
                         style: TextStyle(
-                          color: AppTheme.textLight,
+                          color: accentColor,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
@@ -358,11 +411,11 @@ class _HomeTabContentState extends State<_HomeTabContent> {
                   const SizedBox(height: 6),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: const LinearProgressIndicator(
+                    child: LinearProgressIndicator(
                       value: 0.45,
                       minHeight: 10,
-                      backgroundColor: Color(0xFFF1EDE5),
-                      valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
+                      backgroundColor: Colors.white.withValues(alpha: 0.8),
+                      valueColor: AlwaysStoppedAnimation<Color>(accentColor),
                     ),
                   ),
                 ],
