@@ -38,14 +38,25 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     if (_isTestEnv && widget.apiClient == null) return;
     final client = widget.apiClient ?? ApiClient();
     try {
-      final res = await client.get('/v1/children/1/profile').timeout(const Duration(milliseconds: 200));
+      final res = await client.get('/v1/children/1/profile').timeout(const Duration(milliseconds: 500));
       if (mounted && res.statusCode == 200 && res.data['status'] == true) {
         final data = res.data['data'];
         setState(() {
           _stars = data['available_stars'] ?? _stars;
-          if (data['pet'] != null && data['pet']['skin'] != null) {
-            _equippedSkin = data['pet']['skin'];
-            _unlockedSkins.add(_equippedSkin);
+          if (data['pet'] != null) {
+            final pet = data['pet'];
+            if (pet['active_skin'] != null && pet['active_skin'].toString().isNotEmpty) {
+              _equippedSkin = pet['active_skin'].toString();
+              _unlockedSkins.add(_equippedSkin);
+            }
+            if (pet['unlocked_skins'] != null && pet['unlocked_skins'] is List) {
+              for (var skin in pet['unlocked_skins']) {
+                final skinStr = skin.toString();
+                if (skinStr != 'default' && skinStr.isNotEmpty) {
+                  _unlockedSkins.add(skinStr);
+                }
+              }
+            }
           }
         });
       }
@@ -77,6 +88,9 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
             'skin_name': name,
             'price': cost,
           });
+          if (mounted) {
+            await _loadProfile();
+          }
         } catch (_) {}
       }
 
