@@ -174,59 +174,58 @@ class _HomeTabContentState extends State<_HomeTabContent> {
   }
 
   Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: AppTheme.primary.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.emoji_events_rounded, color: AppTheme.primary, size: 14),
-                    SizedBox(width: 4),
-                    Text(
-                      'Hạng Bạc',
-                      style: TextStyle(
-                        color: AppTheme.text,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 6),
-              const FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Xin chào, Nam! 👋',
-                  style: TextStyle(
-                    color: AppTheme.text,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                  ),
+              Icon(Icons.emoji_events_rounded, color: AppTheme.primary, size: 14),
+              SizedBox(width: 4),
+              Text(
+                'Hạng Bạc',
+                style: TextStyle(
+                  color: AppTheme.text,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(height: 8),
         Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _buildStatItem('🔥', '12 ngày'),
-            const SizedBox(width: 6),
-            _buildStatItem('⭐', '45 Sao'),
+            const Expanded(
+              child: Text(
+                'Xin chào, Nam! 👋',
+                style: TextStyle(
+                  color: AppTheme.text,
+                  fontSize: 21,
+                  fontWeight: FontWeight.w900,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _buildStatItem('🔥', '12 ngày'),
+                const SizedBox(width: 6),
+                _buildStatItem('⭐', '45 Sao'),
+              ],
+            ),
           ],
         ),
       ],
