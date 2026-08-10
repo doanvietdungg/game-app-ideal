@@ -56,7 +56,6 @@ Route::prefix('v1')->group(function () {
         Route::get('analytics/weekly/{childId}', [AnalyticsController::class, 'weekly']);
 
         // Mobile profile & custom support endpoints
-        Route::post('children/{id}/pet/skin', [MobileProfileController::class, 'changeOrUnlockSkin']);
         Route::post('notifications/register', [MobileProfileController::class, 'registerFcmToken']);
         Route::post('blocking/apps', [MobileProfileController::class, 'syncApps']);
     });

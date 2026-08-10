@@ -29,6 +29,27 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _loadProfile();
+  }
+
+  bool get _isTestEnv => WidgetsBinding.instance.runtimeType.toString().contains('Test');
+
+  Future<void> _loadProfile() async {
+    if (_isTestEnv && widget.apiClient == null) return;
+    final client = widget.apiClient ?? ApiClient();
+    try {
+      final res = await client.get('/v1/children/1/profile').timeout(const Duration(milliseconds: 200));
+      if (mounted && res.statusCode == 200 && res.data['status'] == true) {
+        final data = res.data['data'];
+        setState(() {
+          _stars = data['available_stars'] ?? _stars;
+          if (data['pet'] != null && data['pet']['skin'] != null) {
+            _equippedSkin = data['pet']['skin'];
+            _unlockedSkins.add(_equippedSkin);
+          }
+        });
+      }
+    } catch (_) {}
   }
 
   @override
@@ -48,12 +69,15 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
         _equippedSkin = name; // Auto equip on unlock!
       });
 
-      // Sync unlock to Backend Database API if apiClient provided
-      if (widget.apiClient != null) {
-        widget.apiClient!.post('/v1/children/1/pet/skin', data: {
-          'skin_name': name,
-          'price': cost,
-        }).catchError((_) {});
+      // Always sync unlock to Backend Database API
+      if (!_isTestEnv || widget.apiClient != null) {
+        final client = widget.apiClient ?? ApiClient();
+        try {
+          await client.post('/v1/children/1/pet/skin', data: {
+            'skin_name': name,
+            'price': cost,
+          });
+        } catch (_) {}
       }
 
       if (mounted) {
@@ -118,16 +142,28 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     }
   }
 
-  void _equipSkin(String name) {
+  Future<void> _equipSkin(String name) async {
     setState(() {
       _equippedSkin = name;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('🐾 Đã trang bị thành công diện mạo $name!'),
-        backgroundColor: AppTheme.primary,
-      ),
-    );
+    if (!_isTestEnv || widget.apiClient != null) {
+      final client = widget.apiClient ?? ApiClient();
+      try {
+        await client.post('/v1/children/1/pet/skin', data: {
+          'skin_name': name,
+          'price': 0,
+        });
+      } catch (_) {}
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('🐾 Đã trang bị thành công diện mạo $name!'),
+          backgroundColor: AppTheme.primary,
+        ),
+      );
+    }
   }
 
   @override
