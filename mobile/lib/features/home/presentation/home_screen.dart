@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/api/api_client.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../tasks/data/task_repository.dart';
 import '../../tasks/presentation/task_list_screen.dart';
 import '../../rewards/presentation/reward_list_screen.dart';
 import '../../stats/presentation/stats_screen.dart';
@@ -74,21 +76,14 @@ class _HomeTabContent extends StatefulWidget {
 }
 
 class _HomeTabContentState extends State<_HomeTabContent> {
-  // Mock task status tracking: 1: 'approved', 2: 'submitted', 3: 'todo'
-  final Map<int, String> _taskStatuses = {
-    1: 'approved',  // Dọn dẹp phòng -> Đã xong
-    2: 'submitted', // Đọc sách -> Chờ duyệt
-    3: 'todo',      // Rửa chén -> Chưa làm
-  };
-
-  final List<Map<String, dynamic>> _mockTasks = [
+  final List<Map<String, dynamic>> _fallbackTasks = [
     {
       'id': 1,
       'title': 'Dọn dẹp phòng',
       'stars': 5,
       'category': 'housework',
       'emoji': '🏠',
-      'desc': 'Hãy xếp gọn đồ chơi và gấp chăn màn ngăn nắp con nhé!',
+      'status': 'approved',
       'color': const Color(0xFFFFB347),
     },
     {
@@ -97,7 +92,7 @@ class _HomeTabContentState extends State<_HomeTabContent> {
       'stars': 10,
       'category': 'study',
       'emoji': '📚',
-      'desc': 'Đọc tập trung 20 phút sách truyện con yêu thích.',
+      'status': 'submitted',
       'color': const Color(0xFF87CEEB),
     },
     {
@@ -106,10 +101,39 @@ class _HomeTabContentState extends State<_HomeTabContent> {
       'stars': 8,
       'category': 'housework',
       'emoji': '🍽️',
-      'desc': 'Rửa sạch bát đĩa sau bữa ăn cùng bố mẹ nhé!',
+      'status': 'todo',
       'color': const Color(0xFFA8E6CF),
     },
   ];
+
+  List<Map<String, dynamic>> _todayTasks = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTodayTasks();
+  }
+
+  Future<void> _loadTodayTasks() async {
+    try {
+      final repository = TaskRepository(ApiClient());
+      final tasks = await repository.getTodayTasks(1).timeout(const Duration(milliseconds: 200));
+      if (mounted) {
+        setState(() {
+          _todayTasks = tasks.isNotEmpty ? tasks : _fallbackTasks;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _todayTasks = _fallbackTasks;
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -334,19 +358,36 @@ class _HomeTabContentState extends State<_HomeTabContent> {
             ],
           ),
         ),
-        const SizedBox(height: 14),
-        SizedBox(
-          height: 145,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: _mockTasks.length,
-            itemBuilder: (context, index) {
-              final task = _mockTasks[index];
-              final status = _taskStatuses[task['id']] ?? 'todo';
-              return _buildTaskCard(context, task, status);
-            },
-          ),
-        ),
+        _isLoading
+            ? const SizedBox(height: 100, child: Center(child: CircularProgressIndicator()))
+            : _todayTasks.isEmpty
+                ? Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFFFF2D6)),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('🎉 ', style: TextStyle(fontSize: 20)),
+                        Text('Hiện tại không có nhiệm vụ nào!', style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textLight)),
+                      ],
+                    ),
+                  )
+                : SizedBox(
+                    height: 145,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _todayTasks.length,
+                      itemBuilder: (context, index) {
+                        final task = _todayTasks[index];
+                        final status = (task['status'] ?? 'todo').toString();
+                        return _buildTaskCard(context, task, status);
+                      },
+                    ),
+                  ),
       ],
     );
   }
@@ -354,6 +395,7 @@ class _HomeTabContentState extends State<_HomeTabContent> {
   Widget _buildTaskCard(BuildContext context, Map<String, dynamic> task, String status) {
     final bool isApproved = status == 'approved';
     final bool isSubmitted = status == 'submitted';
+    final Color taskColor = (task['color'] is Color) ? task['color'] as Color : AppTheme.primary;
 
     Color cardBgColor = Colors.white;
     Border border = Border.all(color: const Color(0xFFFFF2D6), width: 1.5);
@@ -389,9 +431,7 @@ class _HomeTabContentState extends State<_HomeTabContent> {
 
         final taskId = task['id'] ?? 1;
         await context.push('/tasks/$taskId', extra: task);
-        setState(() {
-          _taskStatuses[taskId] = 'submitted';
-        });
+        _loadTodayTasks();
       },
       child: Container(
         width: 148,
@@ -418,16 +458,16 @@ class _HomeTabContentState extends State<_HomeTabContent> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: (task['color'] as Color).withValues(alpha: 0.15),
+                    color: taskColor.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
                   child: Center(
-                    child: Text(task['emoji'], style: const TextStyle(fontSize: 18)),
+                    child: Text((task['emoji'] ?? '📋').toString(), style: const TextStyle(fontSize: 18)),
                   ),
                 ),
                 const Spacer(),
                 Text(
-                  task['title'],
+                  (task['title'] ?? '').toString(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -449,7 +489,7 @@ class _HomeTabContentState extends State<_HomeTabContent> {
                         ? Colors.green.shade700
                         : isSubmitted
                             ? Colors.amber.shade800
-                            : task['color'],
+                            : taskColor,
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
                   ),
