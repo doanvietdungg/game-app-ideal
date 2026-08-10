@@ -24,11 +24,16 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   final _picker = ImagePicker();
   final String _familyPin = '8888';
 
-  // Determine verification type from category/id for visual presentation (Sprint 2 mock)
+  // Determine verification type from taskData or default to photo/auto for effortless child submission
   String get _verificationType {
-    if (widget.taskId == 1) return 'photo'; // Homework/cleaning requires photo
-    if (widget.taskId == 2) return 'pin';   // Study requires parent verification
-    return 'auto';                         // Others auto approve
+    if (widget.taskData.containsKey('verification_mode')) {
+      return widget.taskData['verification_mode'].toString();
+    }
+    if (widget.taskData.containsKey('verificationType')) {
+      return widget.taskData['verificationType'].toString();
+    }
+    if (widget.taskId == 1 || widget.taskData['category'] == 'housework') return 'photo';
+    return 'auto';
   }
 
   Future<void> _capturePhoto() async {
