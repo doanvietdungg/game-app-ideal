@@ -68,33 +68,110 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-            title: const Text('🎉 Chúc mừng con!', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w900)),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Nhiệm vụ đã được nộp thành công! Hãy đợi bố mẹ duyệt để nhận sao nhé!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.w600, color: AppTheme.textLight),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  '+${widget.taskData['stars']} ⭐',
-                  style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: AppTheme.primary),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  context.pop(); // Close dialog
-                  context.pop(); // Go back to task list
-                },
-                child: const Text('Đồng ý', style: TextStyle(fontWeight: FontWeight.bold)),
+          builder: (context) => Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+            backgroundColor: Colors.white,
+            elevation: 10,
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Animated glowing star icon
+                  Container(
+                    width: 90,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade100,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.amber.withOpacity(0.4),
+                          blurRadius: 20,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: Text('⭐', style: TextStyle(fontSize: 50)),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    '🎉 Xuất Sắc Lắm Con Ôi!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      color: AppTheme.text,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Con vừa hoàn thành "${widget.taskData['title']}"!\nMimi đang rất tự hào về con 🐱✨',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textLight,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.amber.shade400, Colors.deepOrange.shade400],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.deepOrange.withOpacity(0.3),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('Thưởng ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text(
+                          '+${widget.taskData['stars']} ⭐',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        context.pop(); // Close dialog
+                        context.pop(); // Go back to task list
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 4,
+                      ),
+                      child: const Text(
+                        'Tuyệt vời! Tuyệt vời! 🚀',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       }
