@@ -66,8 +66,50 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _HomeTabContent extends StatelessWidget {
+class _HomeTabContent extends StatefulWidget {
   const _HomeTabContent();
+
+  @override
+  State<_HomeTabContent> createState() => _HomeTabContentState();
+}
+
+class _HomeTabContentState extends State<_HomeTabContent> {
+  // Mock task status tracking: 1: 'approved', 2: 'submitted', 3: 'todo'
+  final Map<int, String> _taskStatuses = {
+    1: 'approved',  // Dọn dẹp phòng -> Đã xong
+    2: 'submitted', // Đọc sách -> Chờ duyệt
+    3: 'todo',      // Rửa chén -> Chưa làm
+  };
+
+  final List<Map<String, dynamic>> _mockTasks = [
+    {
+      'id': 1,
+      'title': 'Dọn dẹp phòng',
+      'stars': 5,
+      'category': 'housework',
+      'emoji': '🏠',
+      'desc': 'Hãy xếp gọn đồ chơi và gấp chăn màn ngăn nắp con nhé!',
+      'color': const Color(0xFFFFB347),
+    },
+    {
+      'id': 2,
+      'title': 'Đọc sách 20 phút',
+      'stars': 10,
+      'category': 'study',
+      'emoji': '📚',
+      'desc': 'Đọc tập trung 20 phút sách truyện con yêu thích.',
+      'color': const Color(0xFF87CEEB),
+    },
+    {
+      'id': 3,
+      'title': 'Rửa chén đĩa',
+      'stars': 8,
+      'category': 'housework',
+      'emoji': '🍽️',
+      'desc': 'Rửa sạch bát đĩa sau bữa ăn cùng bố mẹ nhé!',
+      'color': const Color(0xFFA8E6CF),
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -272,36 +314,6 @@ class _HomeTabContent extends StatelessWidget {
   }
 
   Widget _buildTodayTasksSection(BuildContext context) {
-    final List<Map<String, dynamic>> mockTasks = [
-      {
-        'id': 1,
-        'title': 'Dọn dẹp phòng',
-        'stars': 5,
-        'category': 'housework',
-        'emoji': '🏠',
-        'desc': 'Hãy xếp gọn đồ chơi và gấp chăn màn ngăn nắp con nhé!',
-        'color': const Color(0xFFFFB347)
-      },
-      {
-        'id': 2,
-        'title': 'Đọc sách 20 phút',
-        'stars': 10,
-        'category': 'study',
-        'emoji': '📚',
-        'desc': 'Đọc tập trung 20 phút sách truyện con yêu thích.',
-        'color': const Color(0xFF87CEEB)
-      },
-      {
-        'id': 3,
-        'title': 'Rửa chén đĩa',
-        'stars': 8,
-        'category': 'housework',
-        'emoji': '🍽️',
-        'desc': 'Rửa sạch bát đĩa sau bữa ăn cùng bố mẹ nhé!',
-        'color': const Color(0xFFA8E6CF)
-      },
-    ];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -324,13 +336,14 @@ class _HomeTabContent extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         SizedBox(
-          height: 130,
+          height: 145,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: mockTasks.length,
+            itemCount: _mockTasks.length,
             itemBuilder: (context, index) {
-              final task = mockTasks[index];
-              return _buildTaskCard(context, task);
+              final task = _mockTasks[index];
+              final status = _taskStatuses[task['id']] ?? 'todo';
+              return _buildTaskCard(context, task, status);
             },
           ),
         ),
@@ -338,18 +351,54 @@ class _HomeTabContent extends StatelessWidget {
     );
   }
 
-  Widget _buildTaskCard(BuildContext context, Map<String, dynamic> task) {
+  Widget _buildTaskCard(BuildContext context, Map<String, dynamic> task, String status) {
+    final bool isApproved = status == 'approved';
+    final bool isSubmitted = status == 'submitted';
+
+    Color cardBgColor = Colors.white;
+    Border border = Border.all(color: const Color(0xFFFFF2D6), width: 1.5);
+
+    if (isApproved) {
+      cardBgColor = const Color(0xFFF1F9F1);
+      border = Border.all(color: Colors.green.shade300, width: 1.8);
+    } else if (isSubmitted) {
+      cardBgColor = const Color(0xFFFFFDF0);
+      border = Border.all(color: Colors.amber.shade300, width: 1.8);
+    }
+
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
+        if (isApproved) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('🎉 Con đã hoàn thành "${task['title']}" và nhận +${task['stars']} ⭐!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          return;
+        }
+        if (isSubmitted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('🟠 Bài nộp "${task['title']}" đang chờ Bố mẹ duyệt nhé!'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+          return;
+        }
+
         final taskId = task['id'] ?? 1;
-        context.push('/tasks/$taskId', extra: task);
+        await context.push('/tasks/$taskId', extra: task);
+        setState(() {
+          _taskStatuses[taskId] = 'submitted';
+        });
       },
       child: Container(
-        width: 140,
-        margin: const EdgeInsets.only(right: 16),
-        padding: const EdgeInsets.all(16),
+        width: 148,
+        margin: const EdgeInsets.only(right: 14),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: cardBgColor,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
@@ -358,42 +407,87 @@ class _HomeTabContent extends StatelessWidget {
               offset: const Offset(0, 4),
             ),
           ],
-          border: Border.all(color: const Color(0xFFFFF2D6), width: 1.5),
+          border: border,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: (task['color'] as Color).withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(task['emoji'], style: const TextStyle(fontSize: 18)),
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: (task['color'] as Color).withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(task['emoji'], style: const TextStyle(fontSize: 18)),
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  task['title'],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: isApproved ? Colors.green.shade900 : AppTheme.text,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    decoration: isApproved ? TextDecoration.lineThrough : null,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isApproved
+                      ? 'Đã nhận +${task['stars']} ⭐'
+                      : isSubmitted
+                          ? 'Đã nộp bài 🟠'
+                          : '+${task['stars']} Sao',
+                  style: TextStyle(
+                    color: isApproved
+                        ? Colors.green.shade700
+                        : isSubmitted
+                            ? Colors.amber.shade800
+                            : task['color'],
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
             ),
-            const Spacer(),
-            Text(
-              task['title'],
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: AppTheme.text,
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
+            if (isApproved)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade600,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    '✓ Xong',
+                    style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              )
+            else if (isSubmitted)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade700,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'Chờ duyệt',
+                    style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '+${task['stars']} Sao',
-              style: TextStyle(
-                color: task['color'],
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
           ],
         ),
       ),
