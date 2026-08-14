@@ -279,7 +279,28 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
+
+                // Expression & Emotional State Selector Chips
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildExpressionChip('😃 Vui vẻ', 'happy', 'Mimi đang rất vui vẻ! 🌟'),
+                      const SizedBox(width: 8),
+                      _buildExpressionChip('💖 Yêu thương', 'love', 'Mimi yêu bạn nhiều lắm! 💖'),
+                      const SizedBox(width: 8),
+                      _buildExpressionChip('😠 Giận dỗi', 'angry', 'Mimi đang dỗi vì chưa làm bài kìa! 😠'),
+                      const SizedBox(width: 8),
+                      _buildExpressionChip('😢 Buồn rầu', 'sad', 'Mimi hơi buồn một xíu... 😢'),
+                      const SizedBox(width: 8),
+                      _buildExpressionChip('💤 Ngủ khò', 'sleeping', 'Khò khò... Mimi đang ngủ ngon 💤'),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
 
                 // Interactive Food & Action Controls
                 Row(
@@ -319,6 +340,27 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildExpressionChip(String label, String expressionKey, String statusMsg) {
+    final isSelected = _expression == expressionKey;
+    return ChoiceChip(
+      label: Text(label, style: TextStyle(
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        color: isSelected ? Colors.white : AppTheme.text,
+      )),
+      selected: isSelected,
+      selectedColor: AppTheme.primary,
+      backgroundColor: Colors.white,
+      onSelected: (selected) {
+        if (selected) {
+          setState(() {
+            _expression = expressionKey;
+            _statusMessage = statusMsg;
+          });
+        }
+      },
     );
   }
 

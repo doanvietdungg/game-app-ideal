@@ -165,13 +165,14 @@ class _HomeTabContentState extends State<_HomeTabContent> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
+      top: true,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildHeader(),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             _buildPetCanvas(context),
             const SizedBox(height: 28),
             _buildTodayTasksSection(context),
@@ -288,29 +289,53 @@ class _HomeTabContentState extends State<_HomeTabContent> {
     Widget petAvatarWidget = PetPhysicsCanvas(
       skin: _petActiveSkin,
       expression: 'happy',
-      scaleX: 0.52,
-      scaleY: 0.52,
+      scaleX: 0.85,
+      scaleY: 0.85,
       enableAnimations: true,
     );
 
-    if (_petActiveSkin.contains('Robot') || _petActiveSkin.contains('🤖')) {
-      petSkinTitle = 'Mimi Mèo Robot';
-      petTag = '⚡ Cyber Armor';
-      cardGradient = [const Color(0xFFE0F7FA), const Color(0xFFE1F5FE)];
-      accentColor = const Color(0xFF00ACC1);
-      circleColor = const Color(0xFF00E5FF).withValues(alpha: 0.2);
+    if (_petActiveSkin.contains('Corgi') || _petActiveSkin.contains('🦊')) {
+      petSkinTitle = 'Rex Chó Corgi';
+      petTag = '🐕 Chân Ngắn Vui Vẻ';
+      cardGradient = [const Color(0xFFFFF3E0), const Color(0xFFFFE0B2)];
+      accentColor = Colors.orange;
+      circleColor = Colors.amber.withValues(alpha: 0.2);
+    } else if (_petActiveSkin.contains('Shiba') || _petActiveSkin.contains('🐕')) {
+      petSkinTitle = 'Rex Chó Shiba';
+      petTag = '🧣 Khăn Quàng Vui';
+      cardGradient = [const Color(0xFFFFF3E0), const Color(0xFFFFE0B2)];
+      accentColor = Colors.deepOrange;
+      circleColor = Colors.amber.withValues(alpha: 0.2);
     } else if (_petActiveSkin.contains('Ninja') || _petActiveSkin.contains('🥷')) {
       petSkinTitle = 'Mimi Mèo Ninja';
       petTag = '🥷 Băng Nhẫn';
       cardGradient = [const Color(0xFFECEFF1), const Color(0xFFCFD8DC)];
       accentColor = const Color(0xFF37474F);
       circleColor = Colors.grey.withValues(alpha: 0.25);
-    } else if (_petActiveSkin.contains('Quý Tộc') || _petActiveSkin.contains('👑')) {
-      petSkinTitle = 'Mimi Mèo Quý Tộc';
-      petTag = '👑 Hoàng Gia';
-      cardGradient = [const Color(0xFFFFF8E1), const Color(0xFFFFECB3)];
-      accentColor = const Color(0xFFFFB300);
-      circleColor = Colors.amber.withValues(alpha: 0.25);
+    } else if (_petActiveSkin.contains('Rồng') || _petActiveSkin.contains('🐉')) {
+      petSkinTitle = 'Spark Rồng Con';
+      petTag = '🐉 Huyền Thoại';
+      cardGradient = [const Color(0xFFE8F5E9), const Color(0xFFC8E6C9)];
+      accentColor = Colors.green;
+      circleColor = Colors.lightGreen.withValues(alpha: 0.25);
+    } else if (_petActiveSkin.contains('Thỏ') || _petActiveSkin.contains('🐰')) {
+      petSkinTitle = 'Miffy Thỏ Ngọc';
+      petTag = '🥕 Củ Cà Rốt';
+      cardGradient = [const Color(0xFFF3E5F5), const Color(0xFFE1BEE7)];
+      accentColor = Colors.purple;
+      circleColor = Colors.purpleAccent.withValues(alpha: 0.25);
+    } else if (_petActiveSkin.contains('Robot') || _petActiveSkin.contains('🤖')) {
+      petSkinTitle = 'Mimi Mèo Robot';
+      petTag = '⚡ Cyber Armor';
+      cardGradient = [const Color(0xFFE0F7FA), const Color(0xFFE1F5FE)];
+      accentColor = const Color(0xFF00ACC1);
+      circleColor = const Color(0xFF00E5FF).withValues(alpha: 0.2);
+    } else {
+      petSkinTitle = 'Mimi Mèo Cam';
+      petTag = '😊 Vui Vẻ';
+      cardGradient = [const Color(0xFFFFF9F0), const Color(0xFFFFF3E0)];
+      accentColor = AppTheme.primary;
+      circleColor = AppTheme.primary.withValues(alpha: 0.1);
     }
 
     return GestureDetector(
@@ -340,21 +365,10 @@ class _HomeTabContentState extends State<_HomeTabContent> {
           alignment: Alignment.center,
           children: [
             Positioned(
-              top: 18,
-              child: Container(
-                width: 110,
-                height: 110,
-                decoration: BoxDecoration(
-                  color: circleColor,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 3),
-                  boxShadow: [
-                    BoxShadow(
-                      color: accentColor.withValues(alpha: 0.15),
-                      blurRadius: 12,
-                    )
-                  ],
-                ),
+              top: 4,
+              child: SizedBox(
+                width: 170,
+                height: 130,
                 child: Center(child: petAvatarWidget),
               ),
             ),

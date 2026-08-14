@@ -72,28 +72,217 @@ class _PetPhysicsCanvasState extends State<PetPhysicsCanvas> with SingleTickerPr
     super.dispose();
   }
 
+  String _getSpritePath() {
+    final String skinName = widget.skin;
+    final String speciesName = widget.species;
+
+    String state = widget.expression;
+    if (widget.isMouthOpen) {
+      state = 'eating';
+    } else if (widget.expression == 'tickled' || widget.expression == 'happy' || _currentIdleAction == 'waving') {
+      state = 'happy';
+    }
+
+    // 1. Dragon
+    if (speciesName == 'dragon' || skinName.contains('Rồng')) {
+      return 'assets/images/pets/dragon_baby_happy.png';
+    }
+
+    // 2. Rabbit
+    if (speciesName == 'rabbit' || skinName.contains('Thỏ')) {
+      return 'assets/images/pets/rabbit_bunny_happy.png';
+    }
+
+    // 3. Ninja Cat
+    if (skinName.contains('Ninja')) {
+      return 'assets/images/pets/cat_ninja_happy.png';
+    }
+
+    // 4. Shiba Dog
+    if (skinName.contains('Shiba')) {
+      return 'assets/images/pets/dog_shiba_happy.png';
+    }
+
+    // 5. Corgi / Dog
+    if (speciesName == 'dog' || skinName.contains('Corgi') || skinName.contains('Husky')) {
+      if (state == 'eating') return 'assets/images/pets/dog_corgi_eating.png';
+      return 'assets/images/pets/dog_corgi_happy.png';
+    }
+
+    // 6. Orange Cat / Default (Supports: eating, sleeping, angry, love, sad, happy, idle)
+    if (state == 'eating') return 'assets/images/pets/cat_orange_eating.png';
+    if (state == 'sleeping') return 'assets/images/pets/cat_orange_sleeping.png';
+    if (state == 'angry') return 'assets/images/pets/cat_orange_angry.png';
+    if (state == 'love') return 'assets/images/pets/cat_orange_love.png';
+    if (state == 'sad') return 'assets/images/pets/cat_orange_sad.png';
+    if (state == 'happy') return 'assets/images/pets/cat_orange_happy.png';
+    return 'assets/images/pets/cat_orange_idle.png';
+  }
+
+  Widget _buildExpressionOverlayWidget(double progress) {
+    String state = widget.expression;
+    if (widget.isMouthOpen) state = 'eating';
+
+    final bool isCatOrange = (widget.species == 'cat' && (widget.skin == 'Mèo Thường 🐱' || widget.skin == 'Mèo Cam 🐱'));
+
+    List<Widget> overlays = [];
+
+    if (state == 'angry') {
+      final pulse = (sin(progress * pi * 8) * 0.12) + 1.0;
+      overlays.add(
+        Positioned(
+          top: 15,
+          right: 25,
+          child: Transform.scale(
+            scale: pulse,
+            child: const Text('💢', style: TextStyle(fontSize: 32)),
+          ),
+        ),
+      );
+      if (!isCatOrange) {
+        overlays.add(
+          const Positioned(
+            top: 72,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Text('😠', style: TextStyle(fontSize: 48)),
+            ),
+          ),
+        );
+      }
+    } else if (state == 'love') {
+      final floatY = sin(progress * pi * 4) * 8;
+      overlays.add(
+        Positioned(
+          top: 10 + floatY,
+          left: 15,
+          child: const Text('💖✨', style: TextStyle(fontSize: 28)),
+        ),
+      );
+      if (!isCatOrange) {
+        overlays.add(
+          const Positioned(
+            top: 72,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Text('😍', style: TextStyle(fontSize: 48)),
+            ),
+          ),
+        );
+      }
+    } else if (state == 'sad') {
+      final tearY = (progress * 15) % 12;
+      overlays.add(
+        Positioned(
+          top: 60 + tearY,
+          right: 50,
+          child: const Text('💧', style: TextStyle(fontSize: 22)),
+        ),
+      );
+      if (!isCatOrange) {
+        overlays.add(
+          const Positioned(
+            top: 72,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Text('😢', style: TextStyle(fontSize: 48)),
+            ),
+          ),
+        );
+      }
+    } else if (state == 'sleeping') {
+      final floatZ = sin(progress * pi * 4) * 6;
+      overlays.add(
+        Positioned(
+          top: 15 + floatZ,
+          right: 25,
+          child: const Text('💤', style: TextStyle(fontSize: 30)),
+        ),
+      );
+      if (!isCatOrange) {
+        overlays.add(
+          const Positioned(
+            top: 72,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Text('😴', style: TextStyle(fontSize: 48)),
+            ),
+          ),
+        );
+      }
+    } else if (state == 'eating') {
+      overlays.add(
+        const Positioned(
+          bottom: 25,
+          right: 35,
+          child: Text('🍖', style: TextStyle(fontSize: 28)),
+        ),
+      );
+      if (!isCatOrange) {
+        overlays.add(
+          const Positioned(
+            top: 72,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Text('😋', style: TextStyle(fontSize: 48)),
+            ),
+          ),
+        );
+      }
+    }
+
+    return Stack(children: overlays);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _animController,
       builder: (context, child) {
         final progress = _animController.value;
-        final breathValue = sin(progress * pi * 4); // 2 smooth breath cycles per 4s
+        final breathScale = 1.0 + sin(progress * pi * 4) * 0.03; // Smooth breathing pulse
+        final waveAngle = (_currentIdleAction == 'waving') ? sin(progress * pi * 8) * 0.04 : 0.0;
+        final assetPath = _getSpritePath();
 
         return Transform.scale(
-          scaleX: widget.scaleX,
-          scaleY: widget.scaleY,
-          child: CustomPaint(
-            size: const Size(220, 220),
-            painter: _PetPainter(
-              touchOffset: widget.touchOffset,
-              expression: widget.expression,
-              species: widget.species,
-              skin: widget.skin,
-              isMouthOpen: widget.isMouthOpen,
-              breathValue: breathValue,
-              actionValue: progress,
-              idleAction: _currentIdleAction,
+          scaleX: widget.scaleX * breathScale,
+          scaleY: widget.scaleY * breathScale,
+          child: Transform.rotate(
+            angle: waveAngle,
+            child: SizedBox(
+              width: 220,
+              height: 220,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Image.asset(
+                      assetPath,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return CustomPaint(
+                          size: const Size(220, 220),
+                          painter: _PetPainter(
+                            touchOffset: widget.touchOffset,
+                            expression: widget.expression,
+                            species: widget.species,
+                            skin: widget.skin,
+                            isMouthOpen: widget.isMouthOpen,
+                            breathValue: sin(progress * pi * 4),
+                            actionValue: progress,
+                            idleAction: _currentIdleAction,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  _buildExpressionOverlayWidget(progress),
+                ],
+              ),
             ),
           ),
         );

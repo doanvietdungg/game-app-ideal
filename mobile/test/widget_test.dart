@@ -10,6 +10,7 @@ import 'package:mobile/features/pet/presentation/store_screen.dart';
 import 'package:mobile/features/rewards/presentation/reward_list_screen.dart';
 import 'package:mobile/features/stats/presentation/stats_screen.dart';
 import 'package:mobile/features/parent/presentation/parent_approval_screen.dart';
+import 'package:mobile/features/parent/presentation/app_lock_settings_screen.dart';
 import 'package:mobile/features/notifications/presentation/notification_center_screen.dart';
 import 'package:mobile/features/gallery/presentation/praise_gallery_screen.dart';
 import 'package:mobile/features/pet/presentation/pet_selection_screen.dart';
@@ -261,6 +262,19 @@ void main() {
     expect(find.text('Đồng Hồ Tập Trung ⏳'), findsOneWidget);
     expect(find.text('25:00'), findsOneWidget);
     expect(find.text('Bắt đầu học'), findsOneWidget);
+  });
+
+  testWidgets('AppLockSettingsScreen mounts and displays master switch and app list', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: AppLockSettingsScreen(),
+    ));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Quản Lý Khóa App Bố Mẹ 🔒'), findsOneWidget);
+    expect(find.text('Khóa Ứng Dụng Từ Xa'), findsOneWidget);
+    expect(find.text('YouTube 🔴'), findsOneWidget);
+    expect(find.text('Lưu & Áp Dụng Ngay 🛡️'), findsOneWidget);
   });
 
   test('AppBlockingService handles missing plugin gracefully in test env', () async {

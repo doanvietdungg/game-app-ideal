@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../parent/presentation/app_lock_settings_screen.dart';
 import '../data/profile_repository.dart';
 
 class ProfileSettingsScreen extends StatefulWidget {
@@ -107,6 +108,24 @@ class _ProfileSettingsScreenState extends State<ProfileSettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
+
+                  // Parent App Lock Management Card
+                  Card(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    child: ListTile(
+                      leading: const Text('🔒', style: TextStyle(fontSize: 24)),
+                      title: const Text('Quản lý Khóa App từ xa', style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: const Text('Bật/tắt & cài đặt các ứng dụng bị hạn chế'),
+                      trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const AppLockSettingsScreen()),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 12),
 
                   // Account & Navigation Card
                   Card(

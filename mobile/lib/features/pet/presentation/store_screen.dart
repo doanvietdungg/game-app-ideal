@@ -22,7 +22,10 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
   final List<Map<String, dynamic>> _storeSkins = [
     {'name': 'Mèo Robot 🤖', 'cost': 15, 'desc': 'Trang bị vỏ kim loại bóng loáng siêu ngầu.'},
     {'name': 'Mèo Ninja 🥷', 'cost': 30, 'desc': 'Khoác áo choàng đen bí ẩn, di chuyển cực nhanh.'},
-    {'name': 'Mèo Quý Tộc 👑', 'cost': 50, 'desc': 'Đội vương miện hoàng gia lấp lánh sang trọng.'},
+    {'name': 'Chó Corgi 🦊', 'cost': 20, 'desc': 'Chú chó Corgi chân ngắn vẫy chân đáng yêu.'},
+    {'name': 'Chó Shiba 🐕', 'cost': 25, 'desc': 'Chó Shiba quàng khăn cười híp mắt hân hoan.'},
+    {'name': 'Rồng Con 🐉', 'cost': 40, 'desc': 'Rồng con bé nhỏ vẫy cánh bồng bềnh.'},
+    {'name': 'Thỏ Bunny 🐰', 'cost': 35, 'desc': 'Thỏ trắng mềm mại ôm củ cà rốt xinh xắn.'},
   ];
 
   @override

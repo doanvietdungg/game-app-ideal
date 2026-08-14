@@ -35,7 +35,7 @@ class MobileProfileController extends Controller
                     'id' => $child->pet->id,
                     'species' => $child->pet->species->value,
                     'stage' => $child->pet->stage->value,
-                    'active_skin' => $child->pet->active_skin,
+                    'active_skin' => ($child->pet && !empty($child->pet->active_skin) && $child->pet->active_skin !== 'default') ? $child->pet->active_skin : 'Mèo Cam 🐱',
                     'unlocked_skins' => array_merge(['default'], $unlockedSkins),
                 ] : null
             ]
