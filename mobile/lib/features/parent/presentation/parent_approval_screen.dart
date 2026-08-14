@@ -4,6 +4,8 @@ import '../../../core/api/api_client.dart';
 import '../../../core/theme/app_theme.dart';
 import '../data/parent_repository.dart';
 
+import 'app_lock_settings_screen.dart';
+
 class ParentApprovalScreen extends StatefulWidget {
   final ApiClient? apiClient;
   const ParentApprovalScreen({super.key, this.apiClient});
@@ -91,6 +93,16 @@ class _ParentApprovalScreenState extends State<ParentApprovalScreen> {
       appBar: AppBar(
         title: const Text('Phụ Huynh — Duyệt Bài 👨‍👩‍👧'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.lock_person_rounded),
+            tooltip: 'Quản lý Khóa App',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AppLockSettingsScreen()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout_rounded),
             onPressed: () => context.go('/role-selection'),

@@ -188,29 +188,39 @@ class _HomeTabContentState extends State<_HomeTabContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: AppTheme.primary.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.emoji_events_rounded, color: AppTheme.primary, size: 14),
-              SizedBox(width: 4),
-              Text(
-                'Hạng Bạc',
-                style: TextStyle(
-                  color: AppTheme.text,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
               ),
-            ],
-          ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.emoji_events_rounded, color: AppTheme.primary, size: 14),
+                  SizedBox(width: 4),
+                  Text(
+                    'Hạng Bạc',
+                    style: TextStyle(
+                      color: AppTheme.text,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.settings_rounded, color: AppTheme.text, size: 24),
+              tooltip: 'Cài đặt & Hồ sơ',
+              onPressed: () => context.push('/profile/settings'),
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -667,7 +677,7 @@ class _HomeTabContentState extends State<_HomeTabContent> {
             _buildActionItem(Icons.card_giftcard_rounded, 'Đổi quà', AppTheme.primary, () => context.push('/rewards')),
             _buildActionItem(Icons.style_rounded, 'Tủ đồ', AppTheme.accent, () => context.push('/store')),
             _buildActionItem(Icons.pets_rounded, 'Chăm bé', AppTheme.secondary, () => context.push('/pet')),
-            _buildActionItem(Icons.pie_chart_rounded, 'Thống kê', const Color(0xFF87CEEB), () => context.push('/stats')),
+            _buildActionItem(Icons.settings_rounded, 'Cài đặt', const Color(0xFF87CEEB), () => context.push('/profile/settings')),
           ],
         ),
       ],
